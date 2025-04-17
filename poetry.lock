@@ -4660,7 +4660,7 @@ resolved_reference = "c6c0901b3678baa17a17300a0f8e1e9818291b87"
 
 [[package]]
 name = "sic-classification-utils"
-version = "0.1.1"
+version = "0.1.2"
 description = "Utility functions used for SIC classification"
 optional = false
 python-versions = "^3.12"
@@ -4684,8 +4684,10 @@ torch = "2.2.2"
 transformers = "4.48.0"
 
 [package.source]
-type = "directory"
-url = "../sic-classification-utils"
+type = "git"
+url = "https://github.com/ONSdigital/sic-classification-utils.git"
+reference = "v0.1.2"
+resolved_reference = "8df5dbb65f941d5e1aa2f97dbdfe5a2256608925"
 
 [[package]]
 name = "six"
@@ -5768,4 +5770,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "c0a3e9294f100f19156bd5d044eb55816c01204ec38bf794cc061d623515dc34"
+content-hash = "f78faa66bda064c95aa7fb4396d13f739a9f3ce0c1bbbbe7b26eeb40938b0a1a"
