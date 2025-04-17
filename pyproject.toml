@@ -1,0 +1,92 @@
+[project]
+name = "sic-classification-vector-store"
+version = "0.1.0"
+description = "Generic interface for a vector store used for SIC classification"
+authors = [
+    {name = "Steve Gibbard",email = "steve.gibbard@ons.gov.uk"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.11"
+uvicorn = "^0.34.0"
+pydantic = "^2.10.6"
+#sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils.git", tag = "v0.1.1" }
+sic-classification-utils = {path = "../sic-classification-utils"}
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.lint]
+select = [
+    # Enabling ALL is not recommended it will implicitly enable new rules after upgrade.
+    # "ALL",
+
+    # Ruff rules: https://docs.astral.sh/ruff/rules/
+
+    "E",      # pycodestyle erros
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "UP",     # pyupgrade
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "C4",     # flake8-comprehensions
+    "S",      # flake8-bandit
+    "D",      # pydocstyle - Enforce existing docstrings only
+    "C90",    # mccabe
+    "RUF",    # Ruff specific rules
+
+    # PL - Pylint is only partially supported, we also use the pylint tool to catch all the rules.
+    # It is enabled here to take advantage of the ruff's speed.
+    "PL",
+]
+
+ignore = [
+    # Conflicts with google docstring style
+    "D205",
+    # Allow missing docstring, remove to enforce docstrings across the board
+    "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107",
+    # Disable line length check as it is handled by black
+    # :TODO: Remove E501 when ruff supports all black rules
+    "E501",
+    # indentation contains tabs
+    "W191",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    # Allow use of assert statements in tests
+    "S101",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+mkdocs-material = "^9.6.11"
+pytest-cov = "^6.1.1"
+black = "^25.1.0"
+ruff = "^0.11.4"
+pylint = "^3.3.6"
+mypy = "^1.15.0"
+isort = "^6.0.1"
+bandit = "^1.8.3"
+pytest = "^8.3.5"
+httpx = "^0.28.1"
+pytest-mock = "^3.14.0"
+
