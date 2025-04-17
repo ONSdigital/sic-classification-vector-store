@@ -1,0 +1,6 @@
+site_name: SIC Classification Private API
+nav:
+  - Home: index.md
+  - Guide: guide.md
+theme:
+  name: material
