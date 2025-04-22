@@ -4,7 +4,7 @@ The models in this module are used to represent the response
 returned by the API.
 """
 
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel
 
 
 class SearchIndexRequest(BaseModel):
@@ -33,9 +33,7 @@ class SearchIndexItem(BaseModel):
     two_digit_code: str
 
 
-class SearchIndexResponse(
-    RootModel[list[SearchIndexItem]]
-):  # pylint: disable=too-few-public-methods
+class SearchIndexResponse(BaseModel):
     """Model representing the vector store search index multi response."""
 
-    pass  # pylint: disable=unnecessary-pass
+    results: list[SearchIndexItem]

@@ -11,7 +11,7 @@ clean: ## Clean the temporary files.
 	rm -rf .ruff_cache	
 
 # Make does not like interpreting : in the target name, so we use a variable
-API_CMD=poetry run uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
+API_CMD=poetry run uvicorn api.main:app --host 0.0.0.0 --port 8088 --reload
 
 run-vector-store: ## Run the vectore store and API
 	$(API_CMD)
