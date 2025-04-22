@@ -1,6 +1,6 @@
 [project]
 name = "sic-classification-vector-store"
-version = "0.1.0"
+version = "0.1.1"
 description = "Generic interface for a vector store used for SIC classification"
 authors = [
     {name = "Steve Gibbard",email = "steve.gibbard@ons.gov.uk"}

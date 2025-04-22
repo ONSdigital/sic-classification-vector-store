@@ -20,12 +20,13 @@ async def post_search_index(
     Returns:
         SearchIndexResponse: A dictionary containing the current status.
     """
-    results = request.app.state.embed.search_index_multi(
+    search_results = request.app.state.embed.search_index_multi(
         query=[
             payload.industry_descr or "",
             payload.job_title or "",
             payload.job_description or "",
         ]
     )
-    print(f"Results: {results}")
-    return results
+    response = SearchIndexResponse(results=search_results)
+    print(f"Results: {search_results}")
+    return response
