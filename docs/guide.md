@@ -2,7 +2,7 @@
 
 ## Overview
 
-The SIC Classification Vector Store is a FastAPI-based service that provides vector storage and similarity search capabilities for Standard Industrial Classification (SIC) codes. This guide provides detailed information about the service's features, setup, and usage.
+The SIC Classification Vector Store is a FastAPI-based service that provides vector storage and similarity search capabilities for Standard Industrial Classification (SIC) codes. It uses the `sic-classification-utils` embeddings functionality to load a vector store and wraps it with a private API. This guide provides detailed information about the service's features, setup, and usage.
 
 ## Architecture
 
