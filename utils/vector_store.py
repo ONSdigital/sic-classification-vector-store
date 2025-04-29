@@ -34,3 +34,38 @@ def load_vector_store() -> EmbeddingHandler:
     print(f"Vector store status: {vector_store_status}")
     print("Vector store loaded")
     return embed
+
+
+# Create a simple manager class to maintain compatibility
+class VectorStoreManager:
+    """Manager class for the vector store.
+
+    This class provides a simple interface to the vector store functionality.
+    It maintains the state of the vector store and provides methods to interact with it.
+    """
+
+    def __init__(self):
+        """Initialize the vector store manager."""
+        self.ready_event = vector_store_ready_event
+        self.status = vector_store_status
+        self.embed = None
+
+    def load(self):
+        """Load the vector store and update its status."""
+        self.embed = load_vector_store()
+        self.status = self.embed.get_embed_config()
+
+    def search_index_multi(self, query):
+        """Search the vector store with multiple queries.
+
+        Args:
+            query: List of queries to search for
+
+        Returns:
+            List of search results
+        """
+        return self.embed.search_index_multi(query)
+
+
+# Create singleton instance
+vector_store_manager = VectorStoreManager()

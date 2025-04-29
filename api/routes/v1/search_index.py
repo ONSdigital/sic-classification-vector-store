@@ -18,12 +18,12 @@ router: APIRouter = APIRouter()
 
 @router.post("/search-index", response_model=SearchIndexResponse)
 async def post_search_index(
-    request: Request, payload: SearchIndexRequest
+    _request: Request, payload: SearchIndexRequest
 ) -> SearchIndexResponse:
     """Get the indexes from the vector store.
 
     Args:
-        request: FastAPI request object
+        _request: FastAPI request object (unused)
         payload: Search request payload
 
     Returns:
@@ -39,7 +39,7 @@ async def post_search_index(
         )
 
     try:
-        search_results = request.app.state.embed.search_index_multi(
+        search_results = _request.app.state.embed.search_index_multi(
             query=[
                 payload.industry_descr or "",
                 payload.job_title or "",

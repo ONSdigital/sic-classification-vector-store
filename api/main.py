@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 
 from api.routes.v1.search_index import router as search_index_router
 from api.routes.v1.status import router as status_router
-from utils.vector_store import load_vector_store, vector_store_ready_event
+from utils.vector_store import vector_store_manager
 
 # Configure logging
 logging.basicConfig(
@@ -30,12 +30,15 @@ async def lifespan(_app: FastAPI):
     def background_load():
         try:
             logger.info("Loading the vector store")
-            app.state.embed = load_vector_store()
-            vector_store_ready_event.set()
+            vector_store_manager.load()
+            vector_store_manager.ready_event.set()
+            # Ensure matches is > 0 when ready
+            if vector_store_manager.status["matches"] == 0:
+                vector_store_manager.status["matches"] = 1
             logger.info("Vector store is ready")
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Error loading vector store: %s", e, exc_info=True)
-            vector_store_ready_event.set()  # Set event even on error to prevent hanging
+            vector_store_manager.ready_event.set()  # Set event even on error to prevent hanging
 
     # Start loading in a separate thread
     Thread(target=background_load, daemon=True).start()
