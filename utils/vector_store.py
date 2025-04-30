@@ -54,7 +54,7 @@ class VectorStoreManager:
     """
 
     def __init__(self):
-        """Initialize the vector store manager."""
+        """Initialise the vector store manager."""
         self.ready_event = vector_store_ready_event
         self.status = vector_store_status
         self.embed = None
