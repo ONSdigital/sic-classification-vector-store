@@ -64,16 +64,35 @@ class VectorStoreManager:
         self.embed = load_vector_store()
         self.status = self.embed.get_embed_config()
 
-    def search_index_multi(self, query):
-        """Search the vector store with multiple queries.
+    def search(
+        self, industry_descr: str = "", job_title: str = "", job_description: str = ""
+    ):
+        """Search the vector store with the given parameters.
 
         Args:
-            query: List of queries to search for
+            industry_descr: Industry description to search for
+            job_title: Job title to search for
+            job_description: Job description to search for
 
         Returns:
             List of search results
+
+        Raises:
+            RuntimeError: If the vector store is not ready
         """
-        return self.embed.search_index_multi(query)
+        if not self.ready_event.is_set():
+            raise RuntimeError("Vector store is not ready")
+
+        if not self.embed:
+            raise RuntimeError("Vector store not loaded")
+
+        return self.embed.search_index_multi(
+            query=[
+                industry_descr or "",
+                job_title or "",
+                job_description or "",
+            ]
+        )
 
 
 # Create singleton instance
