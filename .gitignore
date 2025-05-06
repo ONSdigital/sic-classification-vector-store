@@ -174,4 +174,4 @@ cython_debug/
 .pypirc
 
 # Data Vector Store files
-data/vector_store/*
+src/sic_classification_vector_store/data/vector_store/*

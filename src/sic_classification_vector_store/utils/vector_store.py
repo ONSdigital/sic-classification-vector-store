@@ -16,13 +16,16 @@ vector_store_ready_event = Event()
 vector_store_status = embedding_config
 
 # Configuration from environment variables with defaults
-VECTOR_STORE_DIR = os.getenv("VECTOR_STORE_DIR", "data/vector_store")
+VECTOR_STORE_DIR = os.getenv(
+    "VECTOR_STORE_DIR", "src/sic_classification_vector_store/data/vector_store"
+)
 SIC_INDEX_FILE = os.getenv(
-    "SIC_INDEX_FILE", "data/sic_index/uksic2007indexeswithaddendumdecember2022.xlsx"
+    "SIC_INDEX_FILE",
+    "src/sic_classification_vector_store/data/sic_index/uksic2007indexeswithaddendumdecember2022.xlsx",  # pylint: disable=line-too-long
 )
 SIC_STRUCTURE_FILE = os.getenv(
     "SIC_STRUCTURE_FILE",
-    "data/sic_index/publisheduksicsummaryofstructureworksheet.xlsx",
+    "src/sic_classification_vector_store/data/sic_index/publisheduksicsummaryofstructureworksheet.xlsx",  # pylint: disable=line-too-long
 )
 
 

@@ -5,7 +5,7 @@ Unit tests for endpoints and utility functions in the vector store.
 
 import pytest
 
-from utils.common import safe_int
+from sic_classification_vector_store.utils.common import safe_int
 
 
 # ruff: noqa: PLR2004

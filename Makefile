@@ -11,45 +11,55 @@ clean: ## Clean the temporary files.
 	rm -rf .ruff_cache	
 
 # Make does not like interpreting : in the target name, so we use a variable
-API_CMD=poetry run uvicorn api.main:app --host 0.0.0.0 --port 8088 --reload
+API_CMD=poetry run uvicorn sic_classification_vector_store.api.main:app --host 0.0.0.0 --port 8088 --reload
 
+.PHONY: run-vector-store
 run-vector-store: ## Run the vectore store and API
 	$(API_CMD)
 
+.PHONY: run-docs
 run-docs: ## Run the mkdocs
 	poetry run mkdocs serve
 
+.PHONY: check-python
 check-python: ## Format the python code (auto fix)
 	poetry run isort . --verbose
 	poetry run black .
 	poetry run ruff check . --fix
 	poetry run mypy --follow-untyped-imports  . 
 	poetry run pylint --verbose .
-	poetry run bandit -r api utils
+	poetry run bandit -r src/sic_classification_vector_store/api src/sic_classification_vector_store/utils
 
+.PHONY: check-python-nofix
 check-python-nofix: ## Format the python code (no fix)
 	poetry run isort . --check --verbose
 	poetry run black . --check
 	poetry run ruff check .
 	poetry run mypy --follow-untyped-imports  . 
 	poetry run pylint --verbose .
-	poetry run bandit -r api utils
+	poetry run bandit -r src/sic_classification_vector_store/api src/sic_classification_vector_store/utils
 
+.PHONY: black
 black: ## Run black
 	poetry run black .
 
+.PHONY: unit-tests
 unit-tests: ## Run the example unit tests
 	poetry run pytest -m utils --cov=utils --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
 
+.PHONY: api-tests
 api-tests: ## Run the example API tests
 	poetry run pytest -m api --cov=api --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
 
+.PHONY: all-tests
 all-tests:
 	poetry run pytest  --cov=. --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
-	
+
+.PHONY: install	
 install: ## Install the dependencies
 	poetry install --only main --no-root
 
+.PHONY: install-dev
 install-dev: ## Install the dev dependencies
 	poetry install --no-root
 

@@ -8,8 +8,11 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
-from api.models.search_index import SearchIndexRequest, SearchIndexResponse
-from utils.vector_store import vector_store_manager
+from sic_classification_vector_store.api.models.search_index import (
+    SearchIndexRequest,
+    SearchIndexResponse,
+)
+from sic_classification_vector_store.utils.vector_store import vector_store_manager
 
 logger = logging.getLogger(__name__)
 
