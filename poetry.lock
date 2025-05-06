@@ -4685,8 +4685,8 @@ transformers = "4.48.0"
 [package.source]
 type = "git"
 url = "https://github.com/ONSdigital/sic-classification-utils.git"
-reference = "v0.1.2"
-resolved_reference = "8df5dbb65f941d5e1aa2f97dbdfe5a2256608925"
+reference = "debug-embedding-changes"
+resolved_reference = "2ed973038447bf8cd43c86531ba8fd40e1a8f71f"
 
 [[package]]
 name = "six"
@@ -5786,4 +5786,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "f78faa66bda064c95aa7fb4396d13f739a9f3ce0c1bbbbe7b26eeb40938b0a1a"
+content-hash = "baada45f7a8418913cea85430399f939a0979d8d1a6f031f44b71c471f481165"

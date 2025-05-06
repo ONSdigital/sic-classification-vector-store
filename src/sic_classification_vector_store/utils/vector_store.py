@@ -3,6 +3,7 @@
 This module contains utility functions to manage the vector store interface.
 """
 
+import logging
 import os
 from threading import Event
 
@@ -10,6 +11,10 @@ from industrial_classification_utils.embed.embedding import (
     EmbeddingHandler,
     embedding_config,
 )
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Shared variables and events
 vector_store_ready_event = Event()
@@ -21,30 +26,40 @@ VECTOR_STORE_DIR = os.getenv(
 )
 SIC_INDEX_FILE = os.getenv(
     "SIC_INDEX_FILE",
-    "src/sic_classification_vector_store/data/sic_index/uksic2007indexeswithaddendumdecember2022.xlsx",  # pylint: disable=line-too-long
+    "uksic2007indexeswithaddendumdecember2022.xlsx",
 )
 SIC_STRUCTURE_FILE = os.getenv(
     "SIC_STRUCTURE_FILE",
-    "src/sic_classification_vector_store/data/sic_index/publisheduksicsummaryofstructureworksheet.xlsx",  # pylint: disable=line-too-long
+    "publisheduksicsummaryofstructureworksheet.xlsx",
 )
+
+# Reference paths for the index and structure files
+PATH_REF = "sic_classification_vector_store.data.sic_index"
+SIC_INDEX_TUPLE = (PATH_REF, SIC_INDEX_FILE)
+SIC_STRUCTURE_TUPLE = (PATH_REF, SIC_STRUCTURE_FILE)
 
 
 def load_vector_store() -> EmbeddingHandler:
     """Load the vector store."""
     # Create the embeddings index
-    print("Loading the vector store")
+    logger.info("Loading the vector store - db_dir: %s", VECTOR_STORE_DIR)
     embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)
+
+    logger.info("Loading the vector store - sic_index_file: %s", SIC_INDEX_TUPLE)
+    logger.info(
+        "Loading the vector store - sic_structure_file: %s", SIC_STRUCTURE_TUPLE
+    )
     embed.embed_index(
         from_empty=False,
-        sic_index_file=SIC_INDEX_FILE,
-        sic_structure_file=SIC_STRUCTURE_FILE,
+        sic_index_file=SIC_INDEX_TUPLE,
+        sic_structure_file=SIC_STRUCTURE_TUPLE,
     )
     vector_store_status = (  # pylint: disable=redefined-outer-name
         embed.get_embed_config()
     )
 
-    print(f"Vector store status: {vector_store_status}")
-    print("Vector store loaded")
+    logger.info("Vector store status: %s", vector_store_status)
+    logger.info("Vector store loaded")
     return embed
 
 
