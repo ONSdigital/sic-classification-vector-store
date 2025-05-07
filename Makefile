@@ -71,17 +71,13 @@ colima-start: ## Start Colima
 colima-stop: ## Stop Colima
 	colima stop
 
-.PHONY: docker-build
-docker-build: ## Build the Docker image
-	#UPDATE#DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock" docker build -t ai-assist-builder .
+.PHONY: docker-image
+docker-image: ## Build the Docker image
+	docker build -t vector-store -f DOCKERFILE .
 
-.PHONY: docker-run
-docker-run: ## Run the Docker container
-	#UPDATE#DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock" docker run \
-		-p 8000:8000 \
-		-e FLASK_SECRET_KEY=FLASK_SECRET_KEY \
-		-e FLASK_ENV=production \
-		ai-assist-builder
+.PHONY: run-docker-image
+run-docker-image: ## Run the Docker image
+	docker run -p 8088:8088 vector-store
 
 .PHONY: docker-clean
 docker-clean: ## Clean Docker resources

@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Tests
+tests/
+pytest.ini
+
+# Documentation
+docs/
+mkdocs.yml
+
+# Local dev and build files
+*.log
+*.md
+Makefile
+CODEOWNERS
+
+# Python environment files
+.venv/
+.cache/
+*.egg-info/
+dist/
+build/
+
+# OS and editor junk files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Vector Store Data
+src/sic_classification_vector_store/data/vector_store/
