@@ -1094,14 +1094,14 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0.dev0)"]
 
 [[package]]
 name = "google-auth"
-version = "2.40.0"
+version = "2.40.1"
 description = "Google Authentication Library"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "google_auth-2.40.0-py2.py3-none-any.whl", hash = "sha256:dc3a5078acb1043c3e43685c22d628afe40af8559cf561de388e0c939280fcc8"},
-    {file = "google_auth-2.40.0.tar.gz", hash = "sha256:c277cf39f7c192d8540eb6331c08b5a0796e8041af8343ae73dd6b269732ca6c"},
+    {file = "google_auth-2.40.1-py2.py3-none-any.whl", hash = "sha256:ed4cae4f5c46b41bae1d19c036e06f6c371926e97b19e816fc854eff811974ee"},
+    {file = "google_auth-2.40.1.tar.gz", hash = "sha256:58f0e8416a9814c1d86c9b7f6acf6816b51aba167b2c76821965271bac275540"},
 ]
 
 [package.dependencies]
@@ -4685,8 +4685,8 @@ transformers = "4.48.0"
 [package.source]
 type = "git"
 url = "https://github.com/ONSdigital/sic-classification-utils.git"
-reference = "debug-embedding-changes"
-resolved_reference = "2ed973038447bf8cd43c86531ba8fd40e1a8f71f"
+reference = "pass-embedding-files"
+resolved_reference = "d8f94c9e461b9b9e88a1b4de5adfdf9c67c76003"
 
 [[package]]
 name = "six"
@@ -5786,4 +5786,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "baada45f7a8418913cea85430399f939a0979d8d1a6f031f44b71c471f481165"
+content-hash = "22d4a460c2be951b74dd019a41039ca971e428f284b51889f1ef1608310c2dd9"

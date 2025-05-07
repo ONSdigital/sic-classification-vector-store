@@ -15,7 +15,7 @@ python = "^3.12"
 fastapi = "^0.115.11"
 uvicorn = "^0.34.0"
 pydantic = "^2.10.6"
-sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils.git", rev = "debug-embedding-changes" }
+sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils.git", rev = "pass-embedding-files" }
 
 [tool.isort]
 profile = "black"
