@@ -79,6 +79,8 @@ Run the image as a container locally:
 docker run -p 8088:8088 vector-store
 ```
 
+or:
+
 ```bash
 make run-docker-image
 ```
