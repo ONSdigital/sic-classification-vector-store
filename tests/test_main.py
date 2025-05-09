@@ -22,7 +22,9 @@ from http import HTTPStatus
 import pytest
 from fastapi.testclient import TestClient
 
-from api.main import app  # Adjust the import based on your project structure
+from sic_classification_vector_store.api.main import (
+    app,  # Adjust the import based on your project structure
+)
 
 logger = logging.getLogger(__name__)
 client = TestClient(app)  # Create a test client for your FastAPI app

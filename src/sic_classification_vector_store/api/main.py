@@ -11,9 +11,11 @@ from threading import Thread
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from api.routes.v1.search_index import router as search_index_router
-from api.routes.v1.status import router as status_router
-from utils.vector_store import vector_store_manager
+from sic_classification_vector_store.api.routes.v1.search_index import (
+    router as search_index_router,
+)
+from sic_classification_vector_store.api.routes.v1.status import router as status_router
+from sic_classification_vector_store.utils.vector_store import vector_store_manager
 
 # Configure logging
 logging.basicConfig(

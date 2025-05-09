@@ -1,6 +1,6 @@
 [project]
 name = "sic-classification-vector-store"
-version = "0.1.1"
+version = "0.1.2"
 description = "Generic interface for a vector store used for SIC classification"
 authors = [
     {name = "Steve Gibbard",email = "steve.gibbard@ons.gov.uk"}
@@ -8,12 +8,14 @@ authors = [
 license = {text = "MIT"}
 readme = "README.md"
 
+packages = [{ include = "sic_classification_vector_store", from = "src" }]
+
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.115.11"
 uvicorn = "^0.34.0"
 pydantic = "^2.10.6"
-sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils.git", tag = "v0.1.2" }
+sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils.git", tag = "v0.1.3" }
 
 [tool.isort]
 profile = "black"

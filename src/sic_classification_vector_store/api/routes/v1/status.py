@@ -6,9 +6,9 @@ It defines the configuration endpoint and returns the current configuration sett
 
 from fastapi import APIRouter, Depends
 
-from api.models.status import StatusResponse
-from utils.common import safe_int
-from utils.vector_store import vector_store_manager
+from sic_classification_vector_store.api.models.status import StatusResponse
+from sic_classification_vector_store.utils.common import safe_int
+from sic_classification_vector_store.utils.vector_store import vector_store_manager
 
 router = APIRouter(tags=["Status"])
 
