@@ -26,7 +26,7 @@ VECTOR_STORE_DIR = os.getenv(
 )
 SIC_INDEX_FILE = os.getenv(
     "SIC_INDEX_FILE",
-    "uksic2007indexeswithaddendumdecember2022.xlsx",
+    "extended_SIC_index.xlsx",
 )
 SIC_STRUCTURE_FILE = os.getenv(
     "SIC_STRUCTURE_FILE",
