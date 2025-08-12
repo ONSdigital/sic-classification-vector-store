@@ -222,7 +222,7 @@ gcloud run services update sic-classification-vector-store \
     --project=survey-assist-sandbox
 ```
 
-### 9.2 Log Analysis
+### 8.3 Log Analysis
 
 ```bash
 # Get recent logs
