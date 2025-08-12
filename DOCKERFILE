@@ -18,12 +18,14 @@
     FROM python:3.12-slim
     
     # Set env vars
-    ENV POETRY_VERSION=2.1.1 \
-        POETRY_HOME="/opt/poetry" \
-        PATH="$POETRY_HOME/bin:$PATH" \
-        PYTHONDONTWRITEBYTECODE=1 \
-        PYTHONUNBUFFERED=1 \
-        HF_HOME="/app/models"
+ENV POETRY_VERSION=2.1.1 \
+    POETRY_HOME="/opt/poetry" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    HF_HOME="/app/models"
+
+# Set PATH after POETRY_HOME is defined
+ENV PATH="$POETRY_HOME/bin:$PATH"
     
     # Install Poetry and minimal build tools
     RUN apt-get update && \
