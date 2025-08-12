@@ -22,7 +22,8 @@ ENV POETRY_VERSION=2.1.1 \
     POETRY_HOME="/opt/poetry" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    HF_HOME="/app/models"
+    HF_HOME="/app/models" \
+    VECTOR_STORE_DIR="sic_classification_vector_store/data/vector_store"
 
 # Set PATH after POETRY_HOME is defined
 ENV PATH="$POETRY_HOME/bin:$PATH"
