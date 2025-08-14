@@ -74,7 +74,8 @@ After the initial deployment, you must manually configure the scaling in the Clo
 4. Ensure **Instance-based** is selected (not Serverless)
 5. Set **Min instances: 1** and **Max instances: 1**
 6. Ensure **Second generation** is selected
-7. Deploy the new revision
+7. In the **Networking** section, ensure **Scaling** is set to Min instances: 1 Max instances: 1
+8. Deploy the new revision
 
 ### 3.3 Verify Instance-Based Scaling
 
