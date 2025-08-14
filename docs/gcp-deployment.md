@@ -74,7 +74,7 @@ After the initial deployment, you must manually configure the scaling in the Clo
 4. Ensure **Instance-based** is selected (not Serverless)
 5. Set **Min instances: 1** and **Max instances: 1**
 6. Ensure **Second generation** is selected
-7. In the **Networking** section, ensure **Scaling** is set to Min instances: 1 Max instances: 1
+7. In the **Networking** section, ensure **Scaling** is set to Min instances: 1 Max instances: leave empty
 8. Deploy the new revision
 
 ### 3.3 Verify Instance-Based Scaling
@@ -85,10 +85,6 @@ gcloud run services describe sic-classification-vector-store \
     --project=survey-assist-sandbox
 ```
 
-**Expected Output:**
-```
-Scaling: Auto (Min: 1, Max: 1)
-```
 
 ## 4. Service Configuration
 
@@ -98,6 +94,17 @@ The service uses these environment variables:
 
 - `VECTOR_STORE_DIR`: Path to vector store data (set automatically)
 - `HF_HOME`: HuggingFace model cache directory
+
+### 4.2 Service Account Permissions
+
+The service account requires the following IAM roles for proper operation:
+
+```bash
+# Grant VertexAI User role for LLM model access
+gcloud projects add-iam-policy-binding {PROJECT_ID} \
+  --member="serviceAccount:{SERVICE_ACCOUNT}" \
+  --role="roles/aiplatform.user"
+```
 
 ## 5. Testing the Deployment
 
