@@ -45,15 +45,15 @@ black: ## Run black
 
 .PHONY: unit-tests
 unit-tests: ## Run the example unit tests
-	poetry run pytest -m utils --cov=utils --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
+	poetry run pytest --ignore=cicd -m utils --cov=utils --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
 
 .PHONY: api-tests
 api-tests: ## Run the example API tests
-	poetry run pytest -m api --cov=api --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
+	poetry run pytest --ignore=cicd -m api --cov=api --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
 
 .PHONY: all-tests
 all-tests:
-	poetry run pytest  --cov=. --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
+	poetry run pytest --ignore=cicd --cov=. --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
 
 .PHONY: install	
 install: ## Install the dependencies

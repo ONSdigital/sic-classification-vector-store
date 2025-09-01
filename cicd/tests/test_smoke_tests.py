@@ -7,17 +7,6 @@ import pytest
 import requests
 
 
-@pytest.fixture
-def id_token():
-    """Fixture to generate an ID token for the SIC API."""
-
-    gcloud_print_id_token = subprocess.check_output(
-        ["gcloud", "auth", "print-identity-token"]  # noqa: S607
-    )
-    id_token = gcloud_print_id_token.decode().strip()
-    return id_token
-
-
 class TestSicApi:
     """Test for the SIC API."""
 
@@ -27,14 +16,18 @@ class TestSicApi:
     else:
         print(f"SIC API URL to test: {url_base}")   
 
-    def test_sic_api_status(self, id_token) -> None:
+    id_token = os.environ.get('SA_ID_TOKEN')
+    if id_token is None:
+        raise ValueError("SA_ID_TOKEN environment variable is not set.")
+
+    def test_sic_api_status(self) -> None:
         """Test SIC API returns successful /status response."""
 
         endpoint = f"{self.url_base}/status"
 
         response = requests.get(
             endpoint,
-            headers={"Authorization": f"Bearer {id_token}"},
+            headers={"Authorization": f"Bearer {self.id_token}"},
             timeout=30,
         )
 
@@ -42,7 +35,7 @@ class TestSicApi:
             f"Expected status code 200, but got {response.status_code}."
         )
 
-    def test_sic_api_search_index(self, id_token) -> None:
+    def test_sic_api_search_index(self) -> None:
         """Test SIC API returns successful /search-index response."""
 
         endpoint = f"{self.url_base}/search-index"
@@ -54,7 +47,7 @@ class TestSicApi:
                 "job_title": "teach maths",
                 "job_description": "mainstream education",
             },
-            headers={"Authorization": f"Bearer {id_token}"},
+            headers={"Authorization": f"Bearer {self.id_token}"},
             timeout=30,
         )
 
