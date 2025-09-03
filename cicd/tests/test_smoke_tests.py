@@ -43,7 +43,7 @@ class TestSicApi:
 
         retry_strategy = Retry(
             total=5,  # maximum number of retries
-            backoff_factor=5,
+            backoff_factor=7,
             status_forcelist=[503],  # the HTTP status codes to retry on
         )       
 
