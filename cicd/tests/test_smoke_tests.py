@@ -56,7 +56,7 @@ class TestSicApi:
         session.mount("https://", adapter)
         endpoint = f"{self.url_base}/search-index"
 
-        print(f"Calling {endpoint}, will retry upto 5 times (if a HTTP status 503 is returned) with an exponential backoff factor of 5...")
+        print(f"Calling {endpoint}, will retry upto 5 times (if a HTTP status 503 is returned) with an exponential backoff factor of 7...")
         response = session.post(
             endpoint,
             json={
