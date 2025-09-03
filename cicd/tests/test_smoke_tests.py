@@ -5,6 +5,8 @@ import subprocess
 
 import pytest
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
 
 class TestSicApi:
@@ -25,6 +27,7 @@ class TestSicApi:
 
         endpoint = f"{self.url_base}/status"
 
+        print(f"Calling {endpoint}...")
         response = requests.get(
             endpoint,
             headers={"Authorization": f"Bearer {self.id_token}"},
@@ -38,9 +41,23 @@ class TestSicApi:
     def test_sic_api_search_index(self) -> None:
         """Test SIC API returns successful /search-index response."""
 
+        retry_strategy = Retry(
+            total=5,  # maximum number of retries
+            backoff_factor=5,
+            status_forcelist=[503],  # the HTTP status codes to retry on
+        )       
+
+        # create an HTTP adapter with the retry strategy and mount it to the session
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        
+        # create a new session object
+        session = requests.Session()
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
         endpoint = f"{self.url_base}/search-index"
 
-        response = requests.post(
+        print(f"Calling {endpoint}, will retry upto 5 times (if a HTTP status 503 is returned) with an exponential backoff factor of 5...")
+        response = session.post(
             endpoint,
             json={
                 "industry_descr": "school teacher",
