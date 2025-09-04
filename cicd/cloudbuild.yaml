@@ -1,5 +1,59 @@
 steps:
-- name: 'ubuntu'
-  args: ['echo', 'Hello World']
+  - name: gcr.io/ons-cicd-surveyassist/testrunner
+    args:
+      - '-c'
+      - |
+        gcloud --version
+        make --version
+        pip --version
+        python --version
+        pytest --version
+        poetry --version
+    id: Verfiy base tooling versions
+    entrypoint: bash
+  - name: gcr.io/ons-cicd-surveyassist/testrunner
+    args:
+      - '-c'
+      - |
+        poetry install
+        make all-tests
+    id: Run unit tests
+    entrypoint: bash
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '-t'
+      - $_GAR_SIC_API_IMAGE
+      - .
+    id: Build SIC Classication Docker Image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - $_GAR_SIC_API_IMAGE
+    id: Package docker image in GAR
+  - name: gcr.io/ons-cicd-surveyassist/testrunner
+    args:
+      - '-c'
+      - >
+        gcloud run deploy sic-classification-vector-store
+        --image=$_GAR_SIC_API_IMAGE --region europe-west2 --project
+        $_SANDBOX_PROJECT_ID --no-allow-unauthenticated
+    id: Deploy SIC classification API
+    entrypoint: bash
+  - name: gcr.io/ons-cicd-surveyassist/testrunner
+    args:
+      - '-c'
+      - >
+        export SIC_API_URL=$_SIC_API_URI/v1/sic-vector-store export
+        SA_ID_TOKEN=`gcloud auth print-identity-token
+        --impersonate-service-account=$_API_SA`
+
+        echo Waiting 3 minutes to allow API to get ready...
+
+        sleep 180
+
+        pytest cicd
+    id: Run SIC classification API smoke tests
+    entrypoint: bash
 options:
   logging: CLOUD_LOGGING_ONLY
