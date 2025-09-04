@@ -13,8 +13,6 @@ class TestSicApi:
     url_base = os.environ.get("SIC_API_URL")
     if url_base is None:
         raise ValueError("SIC_API_URL environment variable is not set.")
-    else:
-        print(f"SIC API URL to test: {url_base}")
 
     id_token = os.environ.get("SA_ID_TOKEN")
     if id_token is None:
@@ -52,9 +50,7 @@ class TestSicApi:
         session.mount("https://", adapter)
         endpoint = f"{self.url_base}/search-index"
 
-        print(
-            f"Calling {endpoint}, will retry upto 5 times (if a HTTP status 503 is returned) with an exponential backoff factor of 7..."
-        )
+        print(f"Calling {endpoint}, will retry upto 5 times with exponential backoff..")
         response = session.post(
             endpoint,
             json={
