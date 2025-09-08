@@ -3,7 +3,7 @@
 # Wrapper script to run the smoke tests locally
 #
 # Expected Env variables: 
-# SIC_VECTOR_STORE_URL - The URL of the SIC classfication API to run the tests against
+# SIC_VECTOR_STORE_URL - The URL of the SIC classification API to run the tests against
 # SA_ID_TOKEN - A valid Google Identity Token generated from your credentials (assuming you're running locally) 
 #
 

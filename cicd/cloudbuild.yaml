@@ -53,7 +53,7 @@ steps:
         sleep 180
 
         pytest cicd
-    id: Run SIC Vectore Store API Smoke Tests
+    id: Run SIC Vector Store API Smoke Tests
     entrypoint: bash
 options:
   logging: CLOUD_LOGGING_ONLY

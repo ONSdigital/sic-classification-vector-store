@@ -50,7 +50,7 @@ class TestSicVectorStoreApi:
         session.mount("https://", adapter)
         endpoint = f"{self.url_base}/search-index"
 
-        print(f"Calling {endpoint}, will retry upto 5 times with exponential backoff..")
+        print(f"Calling {endpoint}, will retry up to 5 times with exponential backoff..")
         response = session.post(
             endpoint,
             json={
