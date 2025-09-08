@@ -7,19 +7,19 @@ from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
 
-class TestSicApi:
-    """Test for the SIC API."""
+class TestSicVectorStoreApi:
+    """Test for the SIC Vector Store API."""
 
-    url_base = os.environ.get("SIC_API_URL")
+    url_base = os.environ.get("SIC_VECTOR_STORE_URL")
     if url_base is None:
-        raise ValueError("SIC_API_URL environment variable is not set.")
+        raise ValueError("SIC_VECTOR_STORE_URL environment variable is not set.")
 
     id_token = os.environ.get("SA_ID_TOKEN")
     if id_token is None:
         raise ValueError("SA_ID_TOKEN environment variable is not set.")
 
-    def test_sic_api_status(self) -> None:
-        """Test SIC API returns successful /status response."""
+    def test_sic_vector_store_api_status(self) -> None:
+        """Test SIC Vector Store API returns successful /status response."""
         endpoint = f"{self.url_base}/status"
 
         print(f"Calling {endpoint}...")
@@ -33,8 +33,8 @@ class TestSicApi:
             response.status_code == 200  # noqa: PLR2004
         ), f"Expected status code 200, but got {response.status_code}."
 
-    def test_sic_api_search_index(self) -> None:
-        """Test SIC API returns successful /search-index response."""
+    def test_sic_vector_store_api_search_index(self) -> None:
+        """Test SIC Vector Store API returns successful /search-index response."""
         retry_strategy = Retry(
             total=5,  # maximum number of retries
             backoff_factor=7,
