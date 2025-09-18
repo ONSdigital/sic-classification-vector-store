@@ -1,5 +1,5 @@
 steps:
-  - name: gcr.io/ons-cicd-surveyassist/testrunner
+  - name: gcr.io/$PROJECT_ID/testrunner
     args:
       - '-c'
       - |
@@ -11,7 +11,7 @@ steps:
         poetry --version
     id: Verify Base Tooling Versions
     entrypoint: bash
-  - name: gcr.io/ons-cicd-surveyassist/testrunner
+  - name: gcr.io/$PROJECT_ID/testrunner
     args:
       - '-c'
       - |
@@ -23,24 +23,24 @@ steps:
     args:
       - build
       - '-t'
-      - $_GAR_SIC_VECTOR_STORE_IMAGE
+      - $_GAR_SIC_VECTOR_STORE_IMAGE:$SHORT_SHA
       - .
     id: Build SIC Vector Store Docker Image
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - $_GAR_SIC_VECTOR_STORE_IMAGE
+      - $_GAR_SIC_VECTOR_STORE_IMAGE:$SHORT_SHA
     id: Package SIC Vector Store Docker Image In GAR
-  - name: gcr.io/ons-cicd-surveyassist/testrunner
+  - name: gcr.io/$PROJECT_ID/testrunner
     args:
       - '-c'
       - >
         gcloud run deploy sic-classification-vector-store
-        --image=$_GAR_SIC_VECTOR_STORE_IMAGE --region europe-west2 --project
-        $_SANDBOX_PROJECT_ID --no-allow-unauthenticated
+        --image=$_GAR_SIC_VECTOR_STORE_IMAGE:$SHORT_SHA --region europe-west2 --project
+        $_TARGET_PROJECT_ID --no-allow-unauthenticated
     id: Deploy SIC Vector Store API
     entrypoint: bash
-  - name: gcr.io/ons-cicd-surveyassist/testrunner
+  - name: gcr.io/$PROJECT_ID/testrunner
     args:
       - '-c'
       - >
