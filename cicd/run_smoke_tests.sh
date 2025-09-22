@@ -18,7 +18,7 @@ else
 fi
 
 if [[ -z "${SIC_VECTOR_STORE_URL}" ]]; then
-    echo Environment variable SIC_VECTOR_STORE_URL was not set, getting sandbox url from parameter store:
+    echo Environment variable SIC_VECTOR_STORE_URL was not set, getting $1 url from parameter store:
     SIC_VECTOR_STORE_URL=$(gcloud parametermanager parameters versions describe $1 --parameter=infra-test-config --location=global --project ons-cicd-surveyassist --format=json | python3 -c "import sys, json; print(json.load(sys.stdin)['payload']['data'])" | base64 --decode | python3 -c "import sys, json; print(json.load(sys.stdin)['cr-sic-url'])")/v1/sic-vector-store
     export SIC_VECTOR_STORE_URL
     echo "$SIC_VECTOR_STORE_URL"
