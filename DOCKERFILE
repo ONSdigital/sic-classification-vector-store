@@ -14,16 +14,27 @@
         apt-get purge -y curl && \
         apt-get clean && rm -rf /var/lib/apt/lists/*
     
+    # Doing SIC data transfer in form of a mock template with google SDK commented to introduce at a later date when used in CloudBuild:
+    FROM google/cloud-sdk:slim AS gcp-downloader
+
+    # ARG _SIC_INDEX_FILE="" # Will be a "gs://..." url
+    ARG _SIC_INDEX_FILE_PATH=""
+
+    WORKDIR /gcp_data
+    # gsutil cp ${_SIC_INDEX_FILE} ./extended_SIC_index.xlsx
+    ADD ${_SIC_INDEX_FILE_PATH} ./extended_SIC_index.xlsx
+
     # ---------- Stage 2: Build Application Image ----------
     FROM python:3.12-slim
     
     # Set env vars
     ENV POETRY_VERSION=2.1.1 \
         POETRY_HOME="/opt/poetry" \
-        PATH="$POETRY_HOME/bin:$PATH" \
+        PATH="/opt/poetry/bin:$PATH" \
         PYTHONDONTWRITEBYTECODE=1 \
         PYTHONUNBUFFERED=1 \
-        HF_HOME="/app/models"
+        HF_HOME="/app/models" \
+        SIC_INDEX_FILE="extended_SIC_index.xlsx"
     
     # Install Poetry and minimal build tools
     RUN apt-get update && \
@@ -41,7 +52,8 @@
     WORKDIR /app
     
     # Copy dependency files first for better layer caching
-    COPY pyproject.toml poetry.lock ./
+    COPY pyproject.toml ./
+    COPY poetry.lock ./
     
     # Install only main (non-dev) dependencies
     RUN /opt/poetry/bin/poetry config virtualenvs.create false && \
@@ -52,6 +64,9 @@
     
     # Copy predownloaded HF model
     COPY --from=model-downloader /models /app/models
+    # Copy predownloaded extended SIC index file
+    COPY --from=gcp-downloader /gcp_data/extended_SIC_index.xlsx /app/sic_classification_vector_store/data/sic_index/
+
     
     # Ensure vector store directory is writable
     RUN mkdir -p ./sic_classification_vector_store/data/vector_store && \
