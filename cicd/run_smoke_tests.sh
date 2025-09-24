@@ -6,10 +6,20 @@
 # SIC_VECTOR_STORE_URL - The URL of the SIC classification API to run the tests against
 # SA_ID_TOKEN - A valid Google Identity Token generated from your credentials (assuming you're running locally) 
 #
+# Expected parameter: [sandbox|dev]
+#
+# Example ./run_smoke_tests.sh dev
+
+if [[ $1 = "sandbox" ]] || [[ $1 = "dev" ]]; then
+   echo Test environment "$1"
+else
+  echo "Please pass test environment of 'sandbox' or 'dev' e.g. ./run_smoke_tests.sh sandbox"
+  exit 1
+fi
 
 if [[ -z "${SIC_VECTOR_STORE_URL}" ]]; then
-    echo Environment variable SIC_VECTOR_STORE_URL was not set, getting sandbox url from parameter store:
-    SIC_VECTOR_STORE_URL=$(gcloud parametermanager parameters versions describe sandbox --parameter=infra-test-config --location=global --project ons-cicd-surveyassist --format=json | python3 -c "import sys, json; print(json.load(sys.stdin)['payload']['data'])" | base64 --decode | python3 -c "import sys, json; print(json.load(sys.stdin)['cr-sic-url'])")/v1/sic-vector-store
+    echo Environment variable SIC_VECTOR_STORE_URL was not set, getting $1 url from parameter store:
+    SIC_VECTOR_STORE_URL=$(gcloud parametermanager parameters versions describe $1 --parameter=infra-test-config --location=global --project ons-cicd-surveyassist --format=json | python3 -c "import sys, json; print(json.load(sys.stdin)['payload']['data'])" | base64 --decode | python3 -c "import sys, json; print(json.load(sys.stdin)['cr-sic-url'])")/v1/sic-vector-store
     export SIC_VECTOR_STORE_URL
     echo "$SIC_VECTOR_STORE_URL"
 else
