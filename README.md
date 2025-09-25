@@ -1,5 +1,5 @@
 # SIC Classification Vector Store
-
+ 
 A stand alone vector store used for SIC classification
 
 ## Overview
