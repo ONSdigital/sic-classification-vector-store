@@ -63,6 +63,12 @@ colima start --cpu 4 --memory 8 --disk 100
 
 Build the docker image locally:
 
+To use an external SIC knowledgebase, run
+```bash
+docker build -t vector-store -f DOCKERFILE . --build-arg _SIC_INDEX_FILE_PATH=<path to sic index file (.xlsx)>
+```
+
+To use the default SIC knowledgebase provided with this repository, run
 ```bash
 docker build -t vector-store -f DOCKERFILE .
 ```
