@@ -16,29 +16,17 @@
     
     # Doing SIC data transfer in form of a mock template with google SDK commented to introduce at a later date when used in CloudBuild:
     FROM google/cloud-sdk:slim AS gcp-downloader
-
-    # ARG _SIC_INDEX_FILE_URL=""
+    
     ARG _SIC_INDEX_FILE_PATH=""
-    ARG _SIC_INDEX_FILE=""
-
 
     WORKDIR /gcp_data
     
-    RUN if [ -f "${_SIC_INDEX_FILE_PATH}" ]; then \
-            # gsutil cp ${_SIC_INDEX_URL} ./SIC_index.xlsx
-            cp "${_SIC_INDEX_FILE_PATH}" ./SIC_index.xlsx; \
-        else \
-            echo "File does not exist"; \
-        fi
+    # If _SIC_INDEX_FILE_PATH is provided and not empty, copy it from the build context.
+    # The Dockerfile frontend will skip this if the source path doesn't exist.
+    COPY --chown=1001:1001 [ "${_SIC_INDEX_FILE_PATH}", "./extended_sic_index.xlsx" ]
 
     # ---------- Stage 2: Build Application Image ----------
     FROM python:3.12-slim
-    
-    RUN if [ -f "${_SIC_INDEX_FILE_PATH}" ]; then \
-            _SIC_INDEX_FILE="SIC_index.xlsx"; \
-        else \
-            echo "Using default SIC index"; \
-        fi
 
     # Set env vars
     ENV POETRY_VERSION=2.1.1 \
@@ -46,8 +34,7 @@
         PATH="/opt/poetry/bin:$PATH" \
         PYTHONDONTWRITEBYTECODE=1 \
         PYTHONUNBUFFERED=1 \
-        HF_HOME="/app/models" \
-        SIC_INDEX_FILE="SIC_index.xlsx"
+        HF_HOME="/app/models" 
     
     # Install Poetry and minimal build tools
     RUN apt-get update && \
@@ -72,26 +59,29 @@
     RUN /opt/poetry/bin/poetry config virtualenvs.create false && \
     /opt/poetry/bin/poetry install --no-root --only main
     
+    # Re-declare the ARG to make it available in this stage.
+    ARG _SIC_INDEX_FILE_PATH
+    # If the build-arg is provided, set the ENV var for the final image.
+    
     # Copy application code
     COPY src/sic_classification_vector_store/ ./sic_classification_vector_store/
-    
+    COPY docker_entrypoint.sh /app/docker_entrypoint.sh
+
     # Copy predownloaded HF model
     COPY --from=model-downloader /models /app/models
-    # Attempt to copy predownloaded extended SIC index file
-    COPY --from=gcp-downloader /gcp_data/SIC_index.xlsx? /app/sic_classification_vector_store/data/sic_index/
-
-    RUN if [ ! -f /app/sic_classification_vector_store/data/sic_index/ ]; then \
-            cp /app/sic_classification_vector_store/data/sic_index/uksic2007indexeswithaddendumdecember2022.xlsx /app/sic_classification_vector_store/data/sic_index/SIC_index.xlsx; \
-        fi
     
     # Ensure vector store directory is writable
     RUN mkdir -p ./sic_classification_vector_store/data/vector_store && \
         chown -R appuser:appuser /app
+
+    RUN chmod +x /app/docker_entrypoint.sh
+
+    # Attempt to copy predownloaded extended SIC index file
+    COPY --from=gcp-downloader /gcp_data/ /app/sic_classification_vector_store/data/sic_index/
     
     # Drop to non-root user
     USER appuser
     
     EXPOSE 8088
-    
-    # Run the application
-    CMD ["/opt/poetry/bin/poetry", "run", "uvicorn", "sic_classification_vector_store.api.main:app", "--host", "0.0.0.0", "--port", "8088"]
+    # Set the docker_entrypoint to run the vector store service
+    ENTRYPOINT ["/app/docker_entrypoint.sh", "${_SIC_INDEX_FILE_PATH}"]
