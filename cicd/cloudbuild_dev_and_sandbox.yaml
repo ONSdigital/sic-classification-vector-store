@@ -15,6 +15,10 @@ steps:
     args:
       - '-c'
       - |
+        gsutil cp
+        $_SIC_INDEX_FILE
+        src/sic_classification_vector_store/data/sic_index/
+
         poetry install
         make all-tests
     id: Run Unit Tests
