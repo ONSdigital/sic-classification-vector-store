@@ -15,6 +15,8 @@ steps:
     args:
       - '-c'
       - |
+        gsutil cp $_SIC_INDEX_FILE src/sic_classification_vector_store/data/sic_index/
+
         poetry install
         make all-tests
     id: Run Unit Tests
@@ -48,9 +50,9 @@ steps:
         SA_ID_TOKEN=`gcloud auth print-identity-token
         --impersonate-service-account=$_API_SA`
 
-        echo Waiting 3 minutes to allow API to get ready...
+        echo Waiting 5 minutes to allow API to get ready...
 
-        sleep 180
+        sleep 300
 
         pytest cicd
     id: Run SIC Vector Store API Smoke Tests
