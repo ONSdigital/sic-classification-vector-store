@@ -15,7 +15,7 @@ python = "^3.12"
 fastapi = "^0.115.9"
 uvicorn = "^0.34.0"
 pydantic = "^2.10.6"
-sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils.git", tag = "v0.1.7" }
+sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils.git", tag = "v0.1.8" }
 
 [tool.isort]
 profile = "black"
