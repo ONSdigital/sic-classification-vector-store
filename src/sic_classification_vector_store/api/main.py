@@ -34,7 +34,7 @@ async def lifespan(_app: FastAPI):
                 vector_store_manager.status["matches"] = 1
             logger.info("Vector store is ready")
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error("Error loading vector store: %s" % e, exc_info=True)
+            logger.error(f"Error loading vector store: {e}", exc_info=True)
             vector_store_manager.ready_event.set()  # Set event even on error to prevent hanging
 
     # Start loading in a separate thread
@@ -56,7 +56,7 @@ app: FastAPI = FastAPI(
 @app.exception_handler(Exception)
 async def generic_error_handler(_request: Request, exc: Exception) -> JSONResponse:
     """Handle generic exceptions."""
-    logger.error("Unexpected error: %s" % exc, exc_info=True)
+    logger.error(f"Unexpected error: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"detail": "An unexpected error occurred"},
