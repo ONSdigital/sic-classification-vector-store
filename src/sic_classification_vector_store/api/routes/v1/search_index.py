@@ -43,13 +43,13 @@ async def post_search_index(
         logger.info("Search completed successfully")
         return SearchIndexResponse(results=search_results)
     except RuntimeError as e:
-        logger.error("Vector store error: %s" % e, exc_info=True)
+        logger.error(f"Vector store error: {e}", exc_info=True)
         raise HTTPException(
             status_code=503,
             detail=str(e),
         ) from e
     except Exception as e:
-        logger.error("Error searching vector store: %s" % e, exc_info=True)
+        logger.error(f"Error searching vector store: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Error searching vector store: {e!s}",
