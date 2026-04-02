@@ -186,4 +186,23 @@ make all-tests
 
 ### Environment Variables
 
-Placeholder
+#### Building or re-building the vector store
+
+The vector store is built from a referenced index file, this could be the published sic index xls or a besoke version. 
+
+Set the ```SIC_INDEX_FILE``` to the appropriate sheet and ensure ```VECTOR_STORE_DIR``` is **NOT** set to build the embeddings in the repo ```data/vector_store``` directory.  
+
+These embeddings can then be uploaded to GCS and subsequent runs can load the pre-built store using the guidance below.
+
+#### Loading a pre-built store
+
+When loading pre-built vector embeddings from GCS the set the VECTOR_STORE_DIR environment variable.
+
+A ```vectors.parquet``` and ```metadata.json``` file must exist in the directory.
+
+
+E.g:
+
+```bash
+export VECTOR_STORE_DIR="gs://<bucket-name>/sic_vector_store_config/vector_store"
+```
