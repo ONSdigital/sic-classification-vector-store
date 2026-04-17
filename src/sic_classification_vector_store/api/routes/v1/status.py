@@ -39,7 +39,6 @@ async def get_status(vector_store=vector_store_dependency) -> StatusResponse:
     status_resp = StatusResponse(
         status="ready" if vector_store.ready_event.is_set() else "loading",
         embedding_model_name=str(vector_store.status.get("embedding_model_name", "")),
-        llm_model_name=str(vector_store.status.get("llm_model_name", "")),
         db_dir=str(vector_store.status.get("db_dir", "")),
         sic_index_file=str(vector_store.status.get("sic_index", "")),
         sic_structure_file=str(vector_store.status.get("sic_structure", "")),
