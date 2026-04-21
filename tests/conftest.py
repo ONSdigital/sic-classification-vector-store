@@ -9,16 +9,10 @@ Functions:
     pytest_sessionfinish(session, exitstatus): Logs the end of a test session.
 """
 
-import logging
-
 import pytest
+from survey_assist_utils.logging import get_logger
 
-# Configure a global logger
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,  # Adjust level as needed (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-)
+logger = get_logger(__name__)
 
 
 def pytest_configure(config):  # pylint: disable=unused-argument

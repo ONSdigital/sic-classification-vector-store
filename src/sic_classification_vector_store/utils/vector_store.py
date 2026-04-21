@@ -3,7 +3,6 @@
 This module contains utility functions to manage the vector store interface.
 """
 
-import logging
 import os
 from threading import Event
 
@@ -11,10 +10,9 @@ from industrial_classification_utils.embed.embedding import (
     EmbeddingHandler,
     embedding_config,
 )
+from survey_assist_utils.logging import get_logger
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, level="DEBUG")
 
 # Shared variables and events
 vector_store_ready_event = Event()
@@ -42,23 +40,25 @@ SIC_STRUCTURE_TUPLE = (PATH_REF, SIC_STRUCTURE_FILE)
 def load_vector_store() -> EmbeddingHandler:
     """Load the vector store."""
     # Create the embeddings index
-    logger.info("Loading the vector store - db_dir: %s", VECTOR_STORE_DIR)
+    logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
     embed = EmbeddingHandler(
         db_dir=VECTOR_STORE_DIR,
         sic_index_file=SIC_INDEX_TUPLE,
         sic_structure_file=SIC_STRUCTURE_TUPLE,
     )
 
-    logger.info("Loading the vector store - sic_index_file: %s", SIC_INDEX_TUPLE)
-    logger.info(
-        "Loading the vector store - sic_structure_file: %s", SIC_STRUCTURE_TUPLE
+    logger.info(f"Loading the vector store - sic_index_file: {SIC_INDEX_TUPLE}")
+    logger.info(f"Loading the vector store - sic_structure_file: {SIC_STRUCTURE_TUPLE}")
+    embed.embed_index(
+        from_empty=False,
+        sic_index_file=SIC_INDEX_TUPLE,
+        sic_structure_file=SIC_STRUCTURE_TUPLE,
     )
-
     vector_store_status = (  # pylint: disable=redefined-outer-name
         embed.get_embed_config()
     )
 
-    logger.info("Vector store status: %s", vector_store_status)
+    logger.info(f"Vector store status: {vector_store_status}")
     logger.info("Vector store loaded")
     return embed
 

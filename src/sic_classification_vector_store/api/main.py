@@ -4,12 +4,12 @@ This module contains the main entry point to the API.
 It defines the FastAPI application and the API endpoints.
 """
 
-import logging
 from contextlib import asynccontextmanager
 from threading import Thread
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from survey_assist_utils.logging import get_logger
 
 from sic_classification_vector_store.api.routes.v1.search_index import (
     router as search_index_router,
@@ -17,12 +17,7 @@ from sic_classification_vector_store.api.routes.v1.search_index import (
 from sic_classification_vector_store.api.routes.v1.status import router as status_router
 from sic_classification_vector_store.utils.vector_store import vector_store_manager
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
@@ -39,7 +34,7 @@ async def lifespan(_app: FastAPI):
                 vector_store_manager.status["matches"] = 1
             logger.info("Vector store is ready")
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error("Error loading vector store: %s", e, exc_info=True)
+            logger.error(f"Error loading vector store: {e}", exc_info=True)
             vector_store_manager.ready_event.set()  # Set event even on error to prevent hanging
 
     # Start loading in a separate thread
@@ -61,7 +56,7 @@ app: FastAPI = FastAPI(
 @app.exception_handler(Exception)
 async def generic_error_handler(_request: Request, exc: Exception) -> JSONResponse:
     """Handle generic exceptions."""
-    logger.error("Unexpected error: %s", exc, exc_info=True)
+    logger.error(f"Unexpected error: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"detail": "An unexpected error occurred"},

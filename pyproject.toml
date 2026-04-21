@@ -16,6 +16,7 @@ fastapi = "^0.115.9"
 uvicorn = "^0.34.0"
 pydantic = "^2.10.6"
 sic-classification-utils = { path = "../sic-classification-utils", develop = true }
+survey-assist-utils = { git = "https://github.com/ONSdigital/survey-assist-utils.git", tag = "v0.0.7" }
 
 [tool.isort]
 profile = "black"
