@@ -45,8 +45,12 @@ async def get_status(
         embedding_model_name=str(vector_store.status.get("embedding_model_name", "")),
         db_dir=str(vector_store.status.get("db_dir", "")),
         sic_index_source=_resolve_file_source(vector_store.status.get("sic_index", "")),
-        sic_structure_source=_resolve_file_source(vector_store.status.get("sic_structure", "")),
-        sic_condensed_source=_resolve_file_source(vector_store.status.get("sic_condensed", "")),
+        sic_structure_source=_resolve_file_source(
+            vector_store.status.get("sic_structure", "")
+        ),
+        sic_condensed_source=_resolve_file_source(
+            vector_store.status.get("sic_condensed", "")
+        ),
         matches=safe_int(vector_store.status.get("matches", 0)),
         index_size=safe_int(vector_store.status.get("index_size", 0)),
     )
@@ -64,7 +68,7 @@ def _resolve_status(vector_store: VectorStoreManager) -> str:
     return "loading"
 
 
-def _resolve_file_source(vector_store_status: tuple[str, str] | str) -> FileSource:
+def _resolve_file_source(vector_store_status: tuple[str, ...] | str) -> FileSource:
     """Resolve a file source from the vector store status."""
     raw_status = vector_store_status if isinstance(vector_store_status, str) else None
 
