@@ -36,7 +36,7 @@ async def get_status(vector_store: Annotated[VectorStoreManager, Depends(get_vec
         StatusResponse: A dictionary containing the current status.
     """
     status_resp = StatusResponse(
-        status="ready" if vector_store.ready_event.is_set() else "loading",
+        status=_resolve_status(vector_store),
         embedding_model_name=str(vector_store.status.get("embedding_model_name", "")),
         db_dir=str(vector_store.status.get("db_dir", "")),
         sic_index_source=_resolve_file_source(vector_store.status.get("sic_index", "")),
@@ -46,6 +46,17 @@ async def get_status(vector_store: Annotated[VectorStoreManager, Depends(get_vec
         index_size=safe_int(vector_store.status.get("index_size", 0)),
     )
     return status_resp
+
+
+def _resolve_status(vector_store: VectorStoreManager) -> str:
+    """Resolve the current vector store lifecycle status."""
+    if vector_store.load_error is not None:
+        return "error"
+
+    if vector_store.ready_event.is_set() and vector_store.embed is not None:
+        return "ready"
+
+    return "loading"
 
 
 def _resolve_file_source(vector_store_status: tuple | str) -> FileSource:

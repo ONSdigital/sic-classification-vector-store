@@ -19,9 +19,7 @@ vector_store_ready_event = Event()
 vector_store_status = embedding_config
 
 # Configuration from environment variables with defaults
-VECTOR_STORE_DIR = os.getenv(
-    "VECTOR_STORE_DIR", "src/sic_classification_vector_store/data/vector_store"
-)
+VECTOR_STORE_DIR = os.getenv("VECTOR_STORE_DIR", "src/sic_classification_vector_store/data/vector_store")
 SIC_INDEX_FILE = os.getenv(
     "SIC_INDEX_FILE",
     "uksic2007indexeswithaddendumdecember2022.xlsx",
@@ -72,15 +70,15 @@ class VectorStoreManager:
         self.ready_event = vector_store_ready_event
         self.status = vector_store_status
         self.embed = None
+        self.load_error: str | None = None
 
     def load(self):
         """Load the vector store and update its status."""
+        self.load_error = None
         self.embed = load_vector_store()
         self.status = self.embed.get_embed_config()
 
-    def search(
-        self, industry_descr: str = "", job_title: str = "", job_description: str = ""
-    ):
+    def search(self, industry_descr: str = "", job_title: str = "", job_description: str = ""):
         """Search the vector store with the given parameters.
 
         Args:
