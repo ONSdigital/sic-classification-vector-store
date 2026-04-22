@@ -11,7 +11,10 @@ from fastapi import APIRouter, Depends
 
 from sic_classification_vector_store.api.models.status import FileSource, StatusResponse
 from sic_classification_vector_store.utils.common import safe_int
-from sic_classification_vector_store.utils.vector_store import VectorStoreManager, vector_store_manager
+from sic_classification_vector_store.utils.vector_store import (
+    VectorStoreManager,
+    vector_store_manager,
+)
 
 router = APIRouter(tags=["Status"])
 
@@ -26,7 +29,9 @@ def get_vector_store():
 
 
 @router.get("/status", response_model=StatusResponse)
-async def get_status(vector_store: Annotated[VectorStoreManager, Depends(get_vector_store)]) -> StatusResponse:
+async def get_status(
+    vector_store: Annotated[VectorStoreManager, Depends(get_vector_store)],
+) -> StatusResponse:
     """Get the current status of the vector store.
 
     Args:
@@ -59,7 +64,7 @@ def _resolve_status(vector_store: VectorStoreManager) -> str:
     return "loading"
 
 
-def _resolve_file_source(vector_store_status: tuple | str) -> FileSource:
+def _resolve_file_source(vector_store_status: tuple[str, str] | str) -> FileSource:
     """Resolve a file source from the vector store status."""
     raw_status = vector_store_status if isinstance(vector_store_status, str) else None
 

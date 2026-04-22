@@ -5,15 +5,19 @@ from typing import Any, cast
 
 import pytest
 
+from sic_classification_vector_store.api.models.status import StatusResponse
 from sic_classification_vector_store.api.routes.v1.status import (
     _resolve_file_source,
     _resolve_status,
     get_status,
     get_vector_store,
 )
-from sic_classification_vector_store.api.models.status import StatusResponse
-from sic_classification_vector_store.utils.vector_store import VectorStoreManager
-from sic_classification_vector_store.utils.vector_store import vector_store_manager as singleton_vector_store_manager
+from sic_classification_vector_store.utils.vector_store import (
+    VectorStoreManager,
+)
+from sic_classification_vector_store.utils.vector_store import (
+    vector_store_manager as singleton_vector_store_manager,
+)
 
 
 def _make_vector_store_manager(
@@ -61,6 +65,9 @@ def test_get_vector_store_returns_singleton_manager() -> None:
 @pytest.mark.asyncio
 async def test_get_status_returns_status_response() -> None:
     """The status route should map the manager state into the response model."""
+    expected_matches = 20
+    expected_index_size = 16618
+
     vector_store_manager = _make_vector_store_manager(ready=True, embed=object())
     vector_store_manager.status = {
         "embedding_model_name": "all-MiniLM-L6-v2",
@@ -77,8 +84,8 @@ async def test_get_status_returns_status_response() -> None:
             "industrial_classification_utils.data.example",
             "sic_2d_condensed.txt",
         ),
-        "matches": 20,
-        "index_size": 16618,
+        "matches": expected_matches,
+        "index_size": expected_index_size,
     }
 
     result = await get_status(vector_store_manager)
@@ -87,20 +94,35 @@ async def test_get_status_returns_status_response() -> None:
     assert result.status == "ready"
     assert result.embedding_model_name == "all-MiniLM-L6-v2"
     assert result.db_dir == "src/sic_classification_vector_store/data/vector_store"
-    assert result.sic_index_source.package == "sic_classification_vector_store.data.sic_index"
-    assert result.sic_index_source.file == "uksic2007indexeswithaddendumdecember2022.xlsx"
-    assert result.sic_structure_source.package == "sic_classification_vector_store.data.sic_index"
-    assert result.sic_structure_source.file == "publisheduksicsummaryofstructureworksheet.xlsx"
-    assert result.sic_condensed_source.package == "industrial_classification_utils.data.example"
+    assert (
+        result.sic_index_source.package
+        == "sic_classification_vector_store.data.sic_index"
+    )
+    assert (
+        result.sic_index_source.file == "uksic2007indexeswithaddendumdecember2022.xlsx"
+    )
+    assert (
+        result.sic_structure_source.package
+        == "sic_classification_vector_store.data.sic_index"
+    )
+    assert (
+        result.sic_structure_source.file
+        == "publisheduksicsummaryofstructureworksheet.xlsx"
+    )
+    assert (
+        result.sic_condensed_source.package
+        == "industrial_classification_utils.data.example"
+    )
     assert result.sic_condensed_source.file == "sic_2d_condensed.txt"
-    assert result.matches == 20
-    assert result.index_size == 16618
+    assert result.matches == expected_matches
+    assert result.index_size == expected_index_size
 
 
 def test_resolve_file_source_parses_tuple_string() -> None:
     """Tuple-like strings should be converted into structured file sources."""
     result = _resolve_file_source(
-        "('sic_classification_vector_store.data.sic_index', 'uksic2007indexeswithaddendumdecember2022.xlsx')"
+        "('sic_classification_vector_store.data.sic_index', "
+        "'uksic2007indexeswithaddendumdecember2022.xlsx')"
     )
 
     assert result.package == "sic_classification_vector_store.data.sic_index"
