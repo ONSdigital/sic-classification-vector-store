@@ -49,7 +49,7 @@ def load_vector_store() -> EmbeddingHandler:
 
     logger.info(f"Loading the vector store - sic_index_file: {SIC_INDEX_TUPLE}")
     logger.info(f"Loading the vector store - sic_structure_file: {SIC_STRUCTURE_TUPLE}")
-    
+
     vector_store_status = (  # pylint: disable=redefined-outer-name
         embed.get_embed_config()
     )

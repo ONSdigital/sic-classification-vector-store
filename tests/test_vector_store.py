@@ -20,7 +20,16 @@ def test_load_vector_store(mocker):
     embed = load_vector_store()
 
     mock_embed_handler.assert_called_once_with(
-        db_dir="src/sic_classification_vector_store/data/vector_store"
+        db_dir="src/sic_classification_vector_store/data/vector_store",
+        sic_index_file=(
+            "sic_classification_vector_store.data.sic_index",
+            "uksic2007indexeswithaddendumdecember2022.xlsx",
+        ),
+        sic_structure_file=(
+            "sic_classification_vector_store.data.sic_index",
+            "publisheduksicsummaryofstructureworksheet.xlsx",
+        ),
     )
-    mock_embed_instance.embed_index.assert_called_once()
+
+    mock_embed_instance.get_embed_config.assert_called_once()
     assert embed == mock_embed_instance

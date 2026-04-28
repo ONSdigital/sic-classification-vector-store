@@ -60,17 +60,18 @@ def test_get_config():
     """
     response = client.get("/v1/sic-vector-store/status")
 
-    # The vector store is not ready yet, so we expect the status to
-    # be "loading" and all fileds to be "unknown"
+    # The vector store is not ready yet, swapping classifai
+    # in means status is "loading" but some elements may be set
+    # earlier, so we check that the expected values are not "unknown" or 0
     assert response.status_code == HTTPStatus.OK
     assert response.json()["status"] == "loading"
-    assert response.json()["llm_model_name"] == "unknown"
-    assert response.json()["embedding_model_name"] == "unknown"
-    assert response.json()["db_dir"] == "unknown"
-    assert response.json()["sic_index_file"] == "unknown"
-    assert response.json()["sic_structure_file"] == "unknown"
-    assert response.json()["sic_condensed_file"] == "unknown"
-    assert response.json()["matches"] == 0
+    assert response.json()["llm_model_name"] in ("unknown", "")
+    assert response.json()["embedding_model_name"] == "all-MiniLM-L6-v2"
+    assert response.json()["db_dir"] != "unknown"
+    assert response.json()["sic_index_file"] != "unknown"
+    assert response.json()["sic_structure_file"] != "unknown"
+    assert response.json()["sic_condensed_file"] != "unknown"
+    assert response.json()["matches"] != 0
     assert response.json()["index_size"] == 0
 
 
