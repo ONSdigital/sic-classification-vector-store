@@ -41,15 +41,15 @@ def load_vector_store() -> EmbeddingHandler:
     """Load the vector store."""
     # Create the embeddings index
     logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-    embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)
-
-    logger.info(f"Loading the vector store - sic_index_file: {SIC_INDEX_TUPLE}")
-    logger.info(f"Loading the vector store - sic_structure_file: {SIC_STRUCTURE_TUPLE}")
-    embed.embed_index(
-        from_empty=False,
+    embed = EmbeddingHandler(
+        db_dir=VECTOR_STORE_DIR,
         sic_index_file=SIC_INDEX_TUPLE,
         sic_structure_file=SIC_STRUCTURE_TUPLE,
     )
+
+    logger.info(f"Loading the vector store - sic_index_file: {SIC_INDEX_TUPLE}")
+    logger.info(f"Loading the vector store - sic_structure_file: {SIC_STRUCTURE_TUPLE}")
+
     vector_store_status = (  # pylint: disable=redefined-outer-name
         embed.get_embed_config()
     )

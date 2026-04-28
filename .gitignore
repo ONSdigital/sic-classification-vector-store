@@ -175,3 +175,5 @@ cython_debug/
 
 # Data Vector Store files
 src/sic_classification_vector_store/data/vector_store/*
+
+.DS_Store
