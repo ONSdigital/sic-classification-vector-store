@@ -4322,13 +4322,13 @@ resolved_reference = "3487e260c58072337818b314d74dce8ba24750b3"
 
 [[package]]
 name = "sic-classification-utils"
-version = "0.1.9"
+version = "0.1.10"
 description = "Utility functions used for SIC classification"
 optional = false
 python-versions = "^3.12"
 groups = ["main"]
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 autocorrect = "^2.6.1"
@@ -4346,8 +4346,10 @@ sic-classification-library = {git = "https://github.com/ONSdigital/sic-classific
 survey-assist-utils = {git = "https://github.com/ONSdigital/survey-assist-utils.git", tag = "v0.0.8"}
 
 [package.source]
-type = "directory"
-url = "../sic-classification-utils"
+type = "git"
+url = "https://github.com/ONSdigital/sic-classification-utils"
+reference = "v0.1.10"
+resolved_reference = "869d07f567f49ada9df66a261f9c022ecfb6aca1"
 
 [[package]]
 name = "six"
@@ -5267,4 +5269,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "058dc0b8c57201463e7a21fad56f06249abc5abc5e525a23fe9c747b201d7242"
+content-hash = "ead09062cb2238ece0b48c309d33a04b77d305549f8a3d74c77361ac1d354807"
