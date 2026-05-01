@@ -74,7 +74,6 @@ def test_get_status_loading():
     Assertions:
     - The response status code is HTTPStatus.OK.
     - The `status` in the response JSON is set to "loading".
-    - The response does not expose `llm_model_name`.
     """
     response = client.get("/v1/sic-vector-store/status")
     data = response.json()
@@ -106,7 +105,6 @@ def test_status_ready():
     - The response status code is HTTPStatus.OK.
     - The `status` in the response JSON is "ready".
     - None of the status fields are "unknown".
-    - The response does not expose `llm_model_name`.
     - Numeric fields (`matches`, `index_size`) are greater than 0.
     """
     # The 'with' allows the vector store thread to run in the TestClient

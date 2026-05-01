@@ -42,7 +42,7 @@
 
                 - name: Debug Poetry
                   run: |
-                    echo "Poetry version: $(poetry --version)"]
+                    echo "Poetry version: $(poetry --version)"
                     echo "Poetry check: $(poetry check)"
                     echo "Poetry config: $(poetry config --list)"
   
