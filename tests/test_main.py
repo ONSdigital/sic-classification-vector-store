@@ -31,6 +31,24 @@ client = TestClient(app)  # Create a test client for your FastAPI app
 
 MAX_WAIT_TIME = 8 * 60  # 8 minutes in seconds
 POLL_INTERVAL = 10  # Poll every 10 seconds
+STATUS_RESPONSE_KEYS = {
+    "status",
+    "embedding_model_name",
+    "db_dir",
+    "sic_index_source",
+    "sic_structure_source",
+    "sic_condensed_source",
+    "matches",
+    "index_size",
+}
+FILE_SOURCE_KEYS = {"package", "file"}
+
+
+def _assert_file_source(file_source: dict[str, str]) -> None:
+    """Assert the nested file source payload matches the API contract."""
+    assert set(file_source) == FILE_SOURCE_KEYS
+    assert isinstance(file_source["package"], str)
+    assert isinstance(file_source["file"], str)
 
 
 @pytest.mark.api
@@ -47,32 +65,32 @@ def test_read_root():
 
 
 @pytest.mark.api
-def test_get_config():
+def test_get_status_loading():
     """Test the `/v1/sic-vector-store/status` endpoint.
 
     This test verifies that the endpoint returns a successful HTTP status code
-    and that the response JSON contains the expected configuration for the
-    `llm_model` key.
+    and that the response JSON matches the loading-state API contract.
 
     Assertions:
     - The response status code is HTTPStatus.OK.
-    - The `llm_model` in the response JSON is set to "gpt-4".
+    - The `status` in the response JSON is set to "loading".
     """
     response = client.get("/v1/sic-vector-store/status")
+    data = response.json()
 
-    # The vector store is not ready yet, swapping classifai
-    # in means status is "loading" but some elements may be set
-    # earlier, so we check that the expected values are not "unknown" or 0
     assert response.status_code == HTTPStatus.OK
-    assert response.json()["status"] == "loading"
-    assert response.json()["llm_model_name"] in ("unknown", "")
-    assert response.json()["embedding_model_name"] == "all-MiniLM-L6-v2"
-    assert response.json()["db_dir"] != "unknown"
-    assert response.json()["sic_index_file"] != "unknown"
-    assert response.json()["sic_structure_file"] != "unknown"
-    assert response.json()["sic_condensed_file"] != "unknown"
-    assert response.json()["matches"] != 0
-    assert response.json()["index_size"] == 0
+    assert data["status"] == "loading"
+    assert set(data) == STATUS_RESPONSE_KEYS
+    assert data["embedding_model_name"] is not None
+    assert isinstance(data["embedding_model_name"], str)
+    assert isinstance(data["db_dir"], str)
+    _assert_file_source(data["sic_index_source"])
+    _assert_file_source(data["sic_structure_source"])
+    _assert_file_source(data["sic_condensed_source"])
+    assert isinstance(data["matches"], int)
+    assert isinstance(data["index_size"], int)
+    assert data["matches"] >= 0
+    assert data["index_size"] >= 0
 
 
 @pytest.mark.api
@@ -86,7 +104,7 @@ def test_status_ready():
     Assertions:
     - The response status code is HTTPStatus.OK.
     - The `status` in the response JSON is "ready".
-    - None of the fields (`llm_model_name`, `embedding_model_name`, etc.) are "unknown".
+    - None of the status fields are "unknown".
     - Numeric fields (`matches`, `index_size`) are greater than 0.
     """
     # The 'with' allows the vector store thread to run in the TestClient
@@ -98,14 +116,20 @@ def test_status_ready():
             assert response.status_code == HTTPStatus.OK
 
             data = response.json()
+            if data["status"] == "error":
+                pytest.fail("The vector store reported an error during startup.")
+
             if data["status"] == "ready":
                 # Verify that none of the fields are "unknown" or 0
-                assert data["llm_model_name"] != "unknown"
+                assert set(data) == STATUS_RESPONSE_KEYS
                 assert data["embedding_model_name"] != "unknown"
                 assert data["db_dir"] != "unknown"
-                assert data["sic_index_file"] != "unknown"
-                assert data["sic_structure_file"] != "unknown"
-                assert data["sic_condensed_file"] != "unknown"
+                _assert_file_source(data["sic_index_source"])
+                _assert_file_source(data["sic_structure_source"])
+                _assert_file_source(data["sic_condensed_source"])
+                assert data["sic_index_source"]["file"] != "unknown"
+                assert data["sic_structure_source"]["file"] != "unknown"
+                assert data["sic_condensed_source"]["file"] != "unknown"
                 assert data["matches"] > 0
                 assert data["index_size"] > 0
                 break

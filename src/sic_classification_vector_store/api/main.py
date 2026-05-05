@@ -34,6 +34,7 @@ async def lifespan(_app: FastAPI):
                 vector_store_manager.status["matches"] = 1
             logger.info("Vector store is ready")
         except Exception as e:  # pylint: disable=broad-exception-caught
+            vector_store_manager.load_error = str(e)
             logger.error(f"Error loading vector store: {e}", exc_info=True)
             vector_store_manager.ready_event.set()  # Set event even on error to prevent hanging
 
