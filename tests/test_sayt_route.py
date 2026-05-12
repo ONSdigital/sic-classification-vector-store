@@ -51,7 +51,7 @@ def test_get_sayt_manager_reads_from_request_state() -> None:
     assert get_sayt_manager(request) is mock_manager
 
 
-def test_sayt_endpoint_returns_suggestions(mocker) -> None:
+def test_sayt_endpoint_returns_suggestions() -> None:
     """The route should return suggester results from the service layer."""
     mock_manager = MagicMock()
     mock_manager.suggest.return_value = [
@@ -73,7 +73,7 @@ def test_sayt_endpoint_returns_suggestions(mocker) -> None:
     mock_manager.suggest.assert_called_once_with("street", 2)
 
 
-def test_sayt_endpoint_returns_service_unavailable(mocker) -> None:
+def test_sayt_endpoint_returns_service_unavailable() -> None:
     """The route should surface manager readiness failures as 503 responses."""
     mock_manager = MagicMock()
     mock_manager.suggest.side_effect = RuntimeError("SAYT suggester is not ready")

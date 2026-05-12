@@ -123,13 +123,14 @@ def test_suggest_uses_loaded_suggester(mocker) -> None:
     """The manager should delegate suggestions to the warmed suggester."""
     manager = SaytManager()
     manager.ready_event.set()
-    manager.suggester = mocker.Mock()
-    manager.suggester.suggest.return_value = ["Street lighting installation"]
+    mock_suggester = mocker.Mock()
+    mock_suggester.suggest.return_value = ["Street lighting installation"]
+    manager.suggester = mock_suggester
 
     result = manager.suggest("street", 2)
 
     assert result == ["Street lighting installation"]
-    manager.suggester.suggest.assert_called_once_with("street", 2)
+    mock_suggester.suggest.assert_called_once_with("street", 2)
 
 
 def test_create_sayt_manager_normalises_path_objects() -> None:

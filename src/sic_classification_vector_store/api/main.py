@@ -24,7 +24,7 @@ logger: SurveyAssistLogger = get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """FastAPI lifespan handler to load vector store in background."""
     sayt_manager: SaytManager = create_sayt_manager()
 

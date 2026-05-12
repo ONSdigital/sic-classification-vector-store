@@ -27,7 +27,8 @@ def resolve_sayt_data_path() -> str:
         return str(resolved_path)
     except (ImportError, OSError) as e:
         fallback_path: str = (
-            "/usr/local/lib/python3.12/site-packages/industrial_classification/data/example_sic_lookup_data.csv"
+            "/usr/local/lib/python3.12/site-packages/industrial_classification/"
+            "data/example_sic_lookup_data.csv"
         )
         logger.warning(
             "Could not resolve packaged SIC SAYT data, using fallback",
