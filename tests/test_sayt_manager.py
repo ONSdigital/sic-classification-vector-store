@@ -6,7 +6,6 @@ import pytest
 
 from sic_classification_vector_store.utils.sayt import (
     SaytManager,
-    create_sayt_manager,
     resolve_sayt_data_path,
 )
 
@@ -89,7 +88,7 @@ def test_load_builds_suggester(mocker) -> None:
 
 def test_suggest_requires_ready_manager() -> None:
     """The manager should reject requests until the suggester is ready."""
-    manager = SaytManager()
+    manager = SaytManager("/resolved/example_sic_lookup_data.csv")
 
     try:
         manager.suggest("street")
@@ -101,7 +100,7 @@ def test_suggest_requires_ready_manager() -> None:
 
 def test_suggest_surfaces_load_error() -> None:
     """The manager should surface startup failures before serving suggestions."""
-    manager = SaytManager()
+    manager = SaytManager("/resolved/example_sic_lookup_data.csv")
     manager.load_error = "csv missing"
 
     with pytest.raises(
@@ -112,7 +111,7 @@ def test_suggest_surfaces_load_error() -> None:
 
 def test_suggest_requires_loaded_suggester_when_ready() -> None:
     """The manager should reject requests if readiness is set without a suggester."""
-    manager = SaytManager()
+    manager = SaytManager("/resolved/example_sic_lookup_data.csv")
     manager.ready_event.set()
 
     with pytest.raises(RuntimeError, match="SAYT suggester not loaded"):
@@ -121,7 +120,7 @@ def test_suggest_requires_loaded_suggester_when_ready() -> None:
 
 def test_suggest_uses_loaded_suggester(mocker) -> None:
     """The manager should delegate suggestions to the warmed suggester."""
-    manager = SaytManager()
+    manager = SaytManager("/resolved/example_sic_lookup_data.csv")
     manager.ready_event.set()
     mock_suggester = mocker.Mock()
     mock_suggester.suggest.return_value = ["Street lighting installation"]
@@ -133,8 +132,8 @@ def test_suggest_uses_loaded_suggester(mocker) -> None:
     mock_suggester.suggest.assert_called_once_with("street", 2)
 
 
-def test_create_sayt_manager_normalises_path_objects() -> None:
-    """The manager factory should normalise path-like input."""
-    manager = create_sayt_manager(Path("/resolved/example_sic_lookup_data.csv"))
+def test_sayt_manager_normalises_path_objects() -> None:
+    """The manager should normalise path-like input."""
+    manager = SaytManager(Path("/resolved/example_sic_lookup_data.csv"))
 
     assert manager.data_path == "/resolved/example_sic_lookup_data.csv"

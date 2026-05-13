@@ -31,7 +31,7 @@ async def test_lifespan_yields_sayt_manager_in_state(mocker) -> None:
     """The app lifespan should share the warmed manager through request state."""
     mock_manager = MagicMock()
     mocker.patch(
-        "sic_classification_vector_store.api.main.create_sayt_manager",
+        "sic_classification_vector_store.api.main.SaytManager",
         return_value=mock_manager,
     )
     mock_start = mocker.patch("sic_classification_vector_store.api.main.Thread.start")

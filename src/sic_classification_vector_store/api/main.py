@@ -17,7 +17,7 @@ from sic_classification_vector_store.api.routes.v1.search_index import (
     router as search_index_router,
 )
 from sic_classification_vector_store.api.routes.v1.status import router as status_router
-from sic_classification_vector_store.utils.sayt import SaytManager, create_sayt_manager
+from sic_classification_vector_store.utils.sayt import SaytManager
 from sic_classification_vector_store.utils.vector_store import vector_store_manager
 
 logger: SurveyAssistLogger = get_logger(__name__)
@@ -26,7 +26,7 @@ logger: SurveyAssistLogger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """FastAPI lifespan handler to load vector store in background."""
-    sayt_manager: SaytManager = create_sayt_manager()
+    sayt_manager: SaytManager = SaytManager()
 
     def background_load():
         try:

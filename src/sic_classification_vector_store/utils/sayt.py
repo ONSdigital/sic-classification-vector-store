@@ -4,7 +4,6 @@ import os
 import time
 from importlib import resources
 from importlib.resources.abc import Traversable
-from pathlib import Path
 from threading import Event
 
 from industrial_classification_utils.sayt import SAYTSuggester
@@ -41,18 +40,18 @@ def resolve_sayt_data_path() -> str:
 class SaytManager:
     """Manage lifecycle and access to the SIC SAYT suggester."""
 
-    def __init__(self, data_path: str | None = None) -> None:
+    def __init__(self, data_path: str | os.PathLike | None = None) -> None:
         """Initialise the SAYT manager."""
         self.ready_event = Event()
         self.suggester: SAYTSuggester | None = None
         self.load_error: str | None = None
-        self.data_path: str = data_path or ""
+        self.data_path: str = (
+            resolve_sayt_data_path() if data_path is None else str(data_path)
+        )
 
     def load(self) -> None:
         """Build the underlying SAYT suggester."""
         self.load_error = None
-        if not self.data_path:
-            self.data_path = resolve_sayt_data_path()
 
         start_time = time.perf_counter()
         logger.info("Loading SIC SAYT suggester", data_path=self.data_path)
@@ -82,10 +81,3 @@ class SaytManager:
             raise RuntimeError("SAYT suggester not loaded")
 
         return self.suggester.suggest(description, num_suggestions)
-
-
-def create_sayt_manager(data_path: str | Path | None = None) -> SaytManager:
-    """Create a SAYT manager with optional preconfigured data path."""
-    resolved_data_path: str | None = None if data_path is None else str(data_path)
-
-    return SaytManager(data_path=resolved_data_path)
