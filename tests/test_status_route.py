@@ -2,16 +2,19 @@
 
 from threading import Event
 from typing import Any, cast
+from unittest.mock import MagicMock
 
 import pytest
 
 from sic_classification_vector_store.api.models.status import StatusResponse
 from sic_classification_vector_store.api.routes.v1.status import (
     _resolve_file_source,
-    _resolve_status,
+    _resolve_manager_status,
+    get_sayt_manager,
     get_status,
     get_vector_store,
 )
+from sic_classification_vector_store.utils.sayt import SaytManager
 from sic_classification_vector_store.utils.vector_store import (
     VectorStoreManager,
 )
@@ -33,18 +36,45 @@ def _make_vector_store_manager(
     return vector_store_manager
 
 
+def _make_sayt_manager(
+    *, ready: bool, suggester: object | None = None, load_error: str | None = None
+) -> SaytManager:
+    """Build a SAYT manager for status resolution tests."""
+    sayt_manager = SaytManager("/resolved/example_sic_lookup_data.csv")
+    sayt_manager.ready_event = Event()
+    if ready:
+        sayt_manager.ready_event.set()
+    sayt_manager.suggester = cast(Any, suggester)
+    sayt_manager.load_error = load_error
+    return sayt_manager
+
+
 def test_resolve_status_returns_loading_while_vector_store_initialises() -> None:
     """The status should remain loading until the embedder is ready."""
     vector_store_manager = _make_vector_store_manager(ready=False)
 
-    assert _resolve_status(vector_store_manager) == "loading"
+    assert (
+        _resolve_manager_status(
+            is_ready=vector_store_manager.ready_event.is_set(),
+            loaded_value=vector_store_manager.embed,
+            load_error=vector_store_manager.load_error,
+        )
+        == "loading"
+    )
 
 
 def test_resolve_status_returns_ready_after_successful_load() -> None:
     """The status should be ready once the embedder is available."""
     vector_store_manager = _make_vector_store_manager(ready=True, embed=object())
 
-    assert _resolve_status(vector_store_manager) == "ready"
+    assert (
+        _resolve_manager_status(
+            is_ready=vector_store_manager.ready_event.is_set(),
+            loaded_value=vector_store_manager.embed,
+            load_error=vector_store_manager.load_error,
+        )
+        == "ready"
+    )
 
 
 def test_resolve_status_returns_error_after_failed_load() -> None:
@@ -54,12 +84,73 @@ def test_resolve_status_returns_error_after_failed_load() -> None:
         load_error="failed to load vector store",
     )
 
-    assert _resolve_status(vector_store_manager) == "error"
+    assert (
+        _resolve_manager_status(
+            is_ready=vector_store_manager.ready_event.is_set(),
+            loaded_value=vector_store_manager.embed,
+            load_error=vector_store_manager.load_error,
+        )
+        == "error"
+    )
+
+
+def test_resolve_sayt_status_returns_loading_while_suggester_initialises() -> None:
+    """The SAYT status should remain loading until the suggester is ready."""
+    sayt_manager = _make_sayt_manager(ready=False)
+
+    assert (
+        _resolve_manager_status(
+            is_ready=sayt_manager.ready_event.is_set(),
+            loaded_value=sayt_manager.suggester,
+            load_error=sayt_manager.load_error,
+        )
+        == "loading"
+    )
+
+
+def test_resolve_sayt_status_returns_ready_after_successful_load() -> None:
+    """The SAYT status should be ready once the suggester is available."""
+    sayt_manager = _make_sayt_manager(ready=True, suggester=object())
+
+    assert (
+        _resolve_manager_status(
+            is_ready=sayt_manager.ready_event.is_set(),
+            loaded_value=sayt_manager.suggester,
+            load_error=sayt_manager.load_error,
+        )
+        == "ready"
+    )
+
+
+def test_resolve_sayt_status_returns_error_after_failed_load() -> None:
+    """The SAYT status should surface startup failures instead of reporting ready."""
+    sayt_manager = _make_sayt_manager(
+        ready=True,
+        load_error="failed to load sayt suggester",
+    )
+
+    assert (
+        _resolve_manager_status(
+            is_ready=sayt_manager.ready_event.is_set(),
+            loaded_value=sayt_manager.suggester,
+            load_error=sayt_manager.load_error,
+        )
+        == "error"
+    )
 
 
 def test_get_vector_store_returns_singleton_manager() -> None:
     """The route dependency should expose the shared vector store manager."""
     assert get_vector_store() is singleton_vector_store_manager
+
+
+def test_get_sayt_manager_reads_from_request_state() -> None:
+    """The route dependency should read the warmed SAYT manager from request state."""
+    mock_manager = MagicMock()
+    request = MagicMock()
+    request.state.sayt_manager = mock_manager
+
+    assert get_sayt_manager(request) is mock_manager
 
 
 @pytest.mark.asyncio
@@ -69,6 +160,7 @@ async def test_get_status_returns_status_response() -> None:
     expected_index_size = 16618
 
     vector_store_manager = _make_vector_store_manager(ready=True, embed=object())
+    sayt_manager = _make_sayt_manager(ready=True, suggester=object())
     vector_store_manager.status = {
         "embedding_model_name": "all-MiniLM-L6-v2",
         "db_dir": "src/sic_classification_vector_store/data/vector_store",
@@ -88,10 +180,11 @@ async def test_get_status_returns_status_response() -> None:
         "index_size": expected_index_size,
     }
 
-    result = await get_status(vector_store_manager)
+    result = await get_status(vector_store_manager, sayt_manager)
 
     assert isinstance(result, StatusResponse)
-    assert result.status == "ready"
+    assert result.vector_store_status == "ready"
+    assert result.sayt_status == "ready"
     assert result.embedding_model_name == "all-MiniLM-L6-v2"
     assert result.db_dir == "src/sic_classification_vector_store/data/vector_store"
     assert (

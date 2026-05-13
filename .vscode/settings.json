@@ -1,3 +1,14 @@
 {
-    "makefile.configureOnOpen": false
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
+    "makefile.configureOnOpen": false,
 }

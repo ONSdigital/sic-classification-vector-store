@@ -45,15 +45,15 @@ black: ## Run black
 
 .PHONY: unit-tests
 unit-tests: ## Run the example unit tests
-	poetry run pytest --ignore=cicd -m utils --cov=utils --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
+	poetry run pytest --ignore=cicd -m utils --cov=sic_classification_vector_store --cov-report=term-missing --cov-fail-under=80 --cov-config=pyproject.toml
 
 .PHONY: api-tests
 api-tests: ## Run the example API tests
-	poetry run pytest --ignore=cicd -m api --cov=api --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
+	poetry run pytest --ignore=cicd -m api --cov=sic_classification_vector_store --cov-report=term-missing --cov-fail-under=80 --cov-config=pyproject.toml
 
 .PHONY: all-tests
 all-tests:
-	poetry run pytest --ignore=cicd --cov=. --cov-report=term-missing --cov-fail-under=80 --cov-config=.coveragerc
+	poetry run pytest --ignore=cicd --cov=sic_classification_vector_store --cov-report=term-missing --cov-fail-under=80 --cov-config=pyproject.toml
 
 .PHONY: install	
 install: ## Install the dependencies

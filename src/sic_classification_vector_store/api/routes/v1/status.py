@@ -9,39 +9,44 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from sic_classification_vector_store.api.models.status import FileSource, StatusResponse
-from sic_classification_vector_store.utils.common import safe_int
-from sic_classification_vector_store.utils.vector_store import (
-    VectorStoreManager,
-    vector_store_manager,
+from sic_classification_vector_store.api.deps import get_sayt_manager, get_vector_store
+from sic_classification_vector_store.api.models.status import (
+    FileSource,
+    RuntimeStatus,
+    StatusResponse,
 )
+from sic_classification_vector_store.utils.common import safe_int
+from sic_classification_vector_store.utils.sayt import SaytManager
+from sic_classification_vector_store.utils.vector_store import VectorStoreManager
 
 router = APIRouter(tags=["Status"])
-
-
-def get_vector_store():
-    """Get a vector store instance.
-
-    Returns:
-        VectorStoreManager: A vector store manager instance.
-    """
-    return vector_store_manager
 
 
 @router.get("/status", response_model=StatusResponse)
 async def get_status(
     vector_store: Annotated[VectorStoreManager, Depends(get_vector_store)],
+    sayt_manager: Annotated[SaytManager, Depends(get_sayt_manager)],
 ) -> StatusResponse:
     """Get the current status of the vector store.
 
     Args:
         vector_store: Vector store manager instance
+        sayt_manager: SIC SAYT manager instance
 
     Returns:
         StatusResponse: A dictionary containing the current status.
     """
-    status_resp = StatusResponse(
-        status=_resolve_status(vector_store),
+    return StatusResponse(
+        vector_store_status=_resolve_manager_status(
+            is_ready=vector_store.ready_event.is_set(),
+            loaded_value=vector_store.embed,
+            load_error=vector_store.load_error,
+        ),
+        sayt_status=_resolve_manager_status(
+            is_ready=sayt_manager.ready_event.is_set(),
+            loaded_value=sayt_manager.suggester,
+            load_error=sayt_manager.load_error,
+        ),
         embedding_model_name=str(vector_store.status.get("embedding_model_name", "")),
         db_dir=str(vector_store.status.get("db_dir", "")),
         sic_index_source=_resolve_file_source(vector_store.status.get("sic_index", "")),
@@ -54,21 +59,22 @@ async def get_status(
         matches=safe_int(vector_store.status.get("matches", 0)),
         index_size=safe_int(vector_store.status.get("index_size", 0)),
     )
-    return status_resp
 
 
-def _resolve_status(vector_store: VectorStoreManager) -> str:
-    """Resolve the current vector store lifecycle status."""
-    if vector_store.load_error is not None:
-        return "error"
+def _resolve_manager_status(
+    *, is_ready: bool, loaded_value: object | None, load_error: str | None
+) -> RuntimeStatus:
+    """Resolve the shared lifecycle status for a managed component."""
+    if load_error is not None:
+        return RuntimeStatus.ERROR
 
-    if vector_store.ready_event.is_set() and vector_store.embed is not None:
-        return "ready"
+    if is_ready and loaded_value is not None:
+        return RuntimeStatus.READY
 
-    return "loading"
+    return RuntimeStatus.LOADING
 
 
-def _resolve_file_source(vector_store_status: tuple[str, ...] | str) -> FileSource:
+def _resolve_file_source(vector_store_status: object) -> FileSource:
     """Resolve a file source from the vector store status."""
     raw_status = vector_store_status if isinstance(vector_store_status, str) else None
 

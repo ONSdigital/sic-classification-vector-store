@@ -25,6 +25,8 @@ from survey_assist_utils.logging import get_logger
 from sic_classification_vector_store.api.main import (
     app,  # Adjust the import based on your project structure
 )
+from sic_classification_vector_store.api.routes.v1.status import get_sayt_manager
+from sic_classification_vector_store.utils.sayt import SaytManager
 
 logger = get_logger(__name__)
 client = TestClient(app)  # Create a test client for your FastAPI app
@@ -32,7 +34,8 @@ client = TestClient(app)  # Create a test client for your FastAPI app
 MAX_WAIT_TIME = 8 * 60  # 8 minutes in seconds
 POLL_INTERVAL = 10  # Poll every 10 seconds
 STATUS_RESPONSE_KEYS = {
-    "status",
+    "vector_store_status",
+    "sayt_status",
     "embedding_model_name",
     "db_dir",
     "sic_index_source",
@@ -42,6 +45,12 @@ STATUS_RESPONSE_KEYS = {
     "index_size",
 }
 FILE_SOURCE_KEYS = {"package", "file"}
+VALID_RUNTIME_STATUSES = {"loading", "ready", "error"}
+
+
+def _make_loading_sayt_manager() -> SaytManager:
+    """Build an unready SAYT manager for status-endpoint contract tests."""
+    return SaytManager("/resolved/example_sic_lookup_data.csv")
 
 
 def _assert_file_source(file_source: dict[str, str]) -> None:
@@ -73,13 +82,20 @@ def test_get_status_loading():
 
     Assertions:
     - The response status code is HTTPStatus.OK.
-    - The `status` in the response JSON is set to "loading".
+    - The `vector_store_status` in the response JSON is set to "loading".
+    - The `sayt_status` in the response JSON is set to "loading".
     """
-    response = client.get("/v1/sic-vector-store/status")
-    data = response.json()
+    app.dependency_overrides[get_sayt_manager] = _make_loading_sayt_manager
+
+    try:
+        response = client.get("/v1/sic-vector-store/status")
+        data = response.json()
+    finally:
+        app.dependency_overrides.clear()
 
     assert response.status_code == HTTPStatus.OK
-    assert data["status"] == "loading"
+    assert data["vector_store_status"] == "loading"
+    assert data["sayt_status"] == "loading"
     assert set(data) == STATUS_RESPONSE_KEYS
     assert data["embedding_model_name"] is not None
     assert isinstance(data["embedding_model_name"], str)
@@ -99,11 +115,13 @@ def test_status_ready():
 
     This test periodically checks the status endpoint to wait for the vector store
     to be ready. If the status does not become "ready" within 8 minutes, the test fails.
-    Once the status is "ready", it verifies that the returned values are not "unknown" or 0.
+    Once the vector store is ready, it verifies that the core status payload is populated
+    and that SAYT reports a valid component status without blocking core readiness.
 
     Assertions:
     - The response status code is HTTPStatus.OK.
-    - The `status` in the response JSON is "ready".
+    - The `vector_store_status` in the response JSON is "ready".
+    - The `sayt_status` in the response JSON is a valid component status.
     - None of the status fields are "unknown".
     - Numeric fields (`matches`, `index_size`) are greater than 0.
     """
@@ -116,12 +134,16 @@ def test_status_ready():
             assert response.status_code == HTTPStatus.OK
 
             data = response.json()
-            if data["status"] == "error":
-                pytest.fail("The vector store reported an error during startup.")
+            if data["vector_store_status"] == "error":
+                raise AssertionError(
+                    "The vector store reported an error during startup."
+                )
 
-            if data["status"] == "ready":
+            if data["vector_store_status"] == "ready":
                 # Verify that none of the fields are "unknown" or 0
                 assert set(data) == STATUS_RESPONSE_KEYS
+                assert data["sayt_status"] in VALID_RUNTIME_STATUSES
+                assert data["sayt_status"] != "error"
                 assert data["embedding_model_name"] != "unknown"
                 assert data["db_dir"] != "unknown"
                 _assert_file_source(data["sic_index_source"])
@@ -137,7 +159,9 @@ def test_status_ready():
             # Check if the maximum wait time has been exceeded
             elapsed_time = time.time() - start_time
             if elapsed_time > MAX_WAIT_TIME:
-                pytest.fail("The vector store did not become ready within 8 minutes.")
+                raise AssertionError(
+                    "The vector store did not become ready within 8 minutes."
+                )
 
             # Wait before polling again
             time.sleep(POLL_INTERVAL)
