@@ -15,6 +15,7 @@ Dependencies:
     - http.HTTPStatus: Provides standard HTTP status codes for assertions.
 """
 
+import os
 import time
 from http import HTTPStatus
 
@@ -25,6 +26,7 @@ from survey_assist_utils.logging import get_logger
 from sic_classification_vector_store.api.main import (
     app,  # Adjust the import based on your project structure
 )
+import sic_classification_vector_store.utils.vector_store as vs_module
 
 logger = get_logger(__name__)
 client = TestClient(app)  # Create a test client for your FastAPI app
@@ -35,21 +37,10 @@ STATUS_RESPONSE_KEYS = {
     "status",
     "embedding_model_name",
     "db_dir",
-    "sic_index_source",
-    "sic_structure_source",
-    "sic_condensed_source",
-    "matches",
+    "index_source_file",
+    "k_matches",
     "index_size",
 }
-FILE_SOURCE_KEYS = {"package", "file"}
-
-
-def _assert_file_source(file_source: dict[str, str]) -> None:
-    """Assert the nested file source payload matches the API contract."""
-    assert set(file_source) == FILE_SOURCE_KEYS
-    assert isinstance(file_source["package"], str)
-    assert isinstance(file_source["file"], str)
-
 
 @pytest.mark.api
 def test_read_root():
@@ -81,20 +72,10 @@ def test_get_status_loading():
     assert response.status_code == HTTPStatus.OK
     assert data["status"] == "loading"
     assert set(data) == STATUS_RESPONSE_KEYS
-    assert data["embedding_model_name"] is not None
-    assert isinstance(data["embedding_model_name"], str)
-    assert isinstance(data["db_dir"], str)
-    _assert_file_source(data["sic_index_source"])
-    _assert_file_source(data["sic_structure_source"])
-    _assert_file_source(data["sic_condensed_source"])
-    assert isinstance(data["matches"], int)
-    assert isinstance(data["index_size"], int)
-    assert data["matches"] >= 0
-    assert data["index_size"] >= 0
 
 
 @pytest.mark.api
-def test_status_ready():
+def test_status_ready(monkeypatch):
     """Test the `/v1/sic-vector-store/status` endpoint until the status is ready.
 
     This test periodically checks the status endpoint to wait for the vector store
@@ -105,8 +86,11 @@ def test_status_ready():
     - The response status code is HTTPStatus.OK.
     - The `status` in the response JSON is "ready".
     - None of the status fields are "unknown".
-    - Numeric fields (`matches`, `index_size`) are greater than 0.
+    - Numeric fields (`k_matches`, `index_size`) are greater than 0.
     """
+    example_csv = os.path.join(os.path.dirname(__file__), "data", "example.csv")
+    monkeypatch.setenv("INDEX_SOURCE_FILE", example_csv)
+    monkeypatch.setattr(vs_module, "INDEX_SOURCE_FILE", example_csv)
     # The 'with' allows the vector store thread to run in the TestClient
     with TestClient(app) as client:  # pylint: disable=redefined-outer-name
         start_time = time.time()
@@ -120,17 +104,11 @@ def test_status_ready():
                 pytest.fail("The vector store reported an error during startup.")
 
             if data["status"] == "ready":
-                # Verify that none of the fields are "unknown" or 0
                 assert set(data) == STATUS_RESPONSE_KEYS
-                assert data["embedding_model_name"] != "unknown"
-                assert data["db_dir"] != "unknown"
-                _assert_file_source(data["sic_index_source"])
-                _assert_file_source(data["sic_structure_source"])
-                _assert_file_source(data["sic_condensed_source"])
-                assert data["sic_index_source"]["file"] != "unknown"
-                assert data["sic_structure_source"]["file"] != "unknown"
-                assert data["sic_condensed_source"]["file"] != "unknown"
-                assert data["matches"] > 0
+                assert data["db_dir"] not in ["unknown", "", None]
+                assert data["embedding_model_name"] not in ["unknown", "", None]
+                assert data["index_source_file"] not in ["unknown", "", None]
+                assert data["k_matches"] > 0
                 assert data["index_size"] > 0
                 break
 

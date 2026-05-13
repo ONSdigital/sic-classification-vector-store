@@ -4,12 +4,11 @@ This module contains the configuration endpoint for the Survey Assist API.
 It defines the configuration endpoint and returns the current configuration settings.
 """
 
-from ast import literal_eval
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from sic_classification_vector_store.api.models.status import FileSource, StatusResponse
+from sic_classification_vector_store.api.models.status import StatusResponse
 from sic_classification_vector_store.utils.common import safe_int
 from sic_classification_vector_store.utils.vector_store import (
     VectorStoreManager,
@@ -40,16 +39,14 @@ async def get_status(
     Returns:
         StatusResponse: A dictionary containing the current status.
     """
-    status_data = vector_store.status or {}
+    config_data = vector_store.config_data if vector_store.embed else {}
     status_resp = StatusResponse(
         status=_resolve_status(vector_store),
-        embedding_model_name=str(status_data.get("embedding_model_name", "")),
-        db_dir=str(status_data.get("db_dir", "")),
-        sic_index_source=_resolve_file_source(status_data.get("sic_index", "")),
-        sic_structure_source=_resolve_file_source(status_data.get("sic_structure", "")),
-        sic_condensed_source=_resolve_file_source(status_data.get("sic_condensed", "")),
-        matches=safe_int(status_data.get("matches", 0)),
-        index_size=safe_int(status_data.get("index_size", 0)),
+        embedding_model_name=str(config_data.get("embedding_model_name", "")),
+        db_dir=str(config_data.get("db_dir", "")),
+        index_source_file=str(config_data.get("index_source_file", "")),
+        k_matches=safe_int(config_data.get("k_matches", 0)),
+        index_size=safe_int(config_data.get("index_size", 0)),
     )
     return status_resp
 
@@ -64,26 +61,4 @@ def _resolve_status(vector_store: VectorStoreManager) -> str:
 
     return "loading"
 
-
-def _resolve_file_source(vector_store_status: tuple[str, ...] | str) -> FileSource:
-    """Resolve a file source from the vector store status."""
-    raw_status = vector_store_status if isinstance(vector_store_status, str) else None
-
-    if raw_status is not None:
-        try:
-            vector_store_status = literal_eval(raw_status)
-        except (SyntaxError, ValueError):
-            return FileSource(package="unknown", file=raw_status)
-
-    if isinstance(vector_store_status, tuple):
-        try:
-            package, file = vector_store_status
-        except ValueError:
-            pass
-        else:
-            return FileSource(package=str(package), file=str(file))
-
-    if raw_status is not None:
-        return FileSource(package="unknown", file=raw_status)
-
-    return FileSource(package="unknown", file="unknown")
+# %%

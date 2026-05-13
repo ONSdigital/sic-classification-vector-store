@@ -4,40 +4,34 @@ The models in this module are used to represent the response
 returned by the API.
 """
 
-from pydantic import BaseModel
+from pydantic import model_validator
+from industrial_classification_utils.models.config_model import EmbeddingConfig
 
 
-class FileSource(BaseModel):
-    """Model representing a file source for the vector store.
-
-    Attributes:
-        package (str): The name of the package containing the file.
-        file (str): The name of the file.
-    """
-
-    package: str
-    file: str
-
-
-class StatusResponse(BaseModel):
+class StatusResponse(EmbeddingConfig):
     """Model representing the vector store status response.
 
     Attributes:
         embedding_model_name (str): The name of the embeddings model.
         db_dir (str): The vector store directory.
-        sic_index_source (FileSource): The SIC index source file.
-        sic_structure_source (FileSource): The SIC structure source file.
-        sic_condensed_source (FileSource): The condensed SIC reference file.
-        matches (int): The number of nearest matches initialised in the vector store.
+        index_source_file (str): The source file for the index.
+        k_matches (int): The number of nearest matches initialised in the vector store.
         index_size (int): The number of embedded entries in the vector store.
         status (str): The status of the vector store.
     """
 
     status: str
-    embedding_model_name: str
-    db_dir: str
-    sic_index_source: FileSource
-    sic_structure_source: FileSource
-    sic_condensed_source: FileSource
-    matches: int
-    index_size: int
+
+    @model_validator(mode="after")
+    def validate_ready_state(self) -> "StatusResponse":
+        if self.status == "ready":
+            if self.k_matches is None or self.k_matches < 1:
+                raise ValueError("k_matches must be at least 1 when ready")
+            if self.k_matches > 100:
+                raise ValueError("k_matches must be at most 100")
+            if self.index_size is None or self.index_size < 1:
+                raise ValueError("index_size must be at least 1 when ready")
+            for field, val in [("embedding_model_name", self.embedding_model_name), ("db_dir", self.db_dir), ("index_source_file", self.index_source_file)]:
+                if not val or val == "unknown":
+                    raise ValueError(f"{field} must be a valid value when ready")
+        return self

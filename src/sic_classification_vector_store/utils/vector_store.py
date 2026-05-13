@@ -34,19 +34,21 @@ class VectorStoreManager:
     def __init__(self):
         """Initialise the vector store manager."""
         self.ready_event = vector_store_ready_event
-        self.status = None
         self.embed = None
+        self.config_data = None
         self.load_error: str | None = None
 
     def load(self):
         """Load the vector store and update its status."""
         self.load_error = None
         logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-        self.embed = EmbeddingHandler(
-            db_dir=VECTOR_STORE_DIR, index_source_file=INDEX_SOURCE_FILE
-        )
+        kwargs = {"db_dir": VECTOR_STORE_DIR}
+        if INDEX_SOURCE_FILE:
+            kwargs["index_source_file"] = INDEX_SOURCE_FILE
+        self.embed = EmbeddingHandler(**kwargs)
         logger.info("Vector store loaded")
-        self.status = self.embed.get_embed_config()
+        config = self.embed.get_embed_config()
+        self.config_data = config.model_dump() if hasattr(config, "model_dump") else config
 
     def search(
         self, industry_descr: str = "", job_title: str = "", job_description: str = ""

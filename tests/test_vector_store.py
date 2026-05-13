@@ -22,8 +22,7 @@ def test_vector_store_manager_load(mocker):
 
     mock_embed_handler.assert_called_once_with(
         db_dir="src/sic_classification_vector_store/data/vector_store",
-        index_source_file=None,
     )
     mock_embed_instance.get_embed_config.assert_called_once()
     assert manager.embed == mock_embed_instance
-    assert manager.status == {"status": "mocked"}
+    assert manager.config_data == {"status": "mocked"}
