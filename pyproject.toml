@@ -16,7 +16,7 @@ fastapi = "^0.115.9"
 uvicorn = "^0.34.0"
 pydantic = "^2.10.6"
 pytest-asyncio = "^1.3.0"
-sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils", rev = "0fce44b47369ae91c4d45f5591591b3fc6633dfa" }
+sic-classification-utils = { git = "https://github.com/ONSdigital/sic-classification-utils", rev = "0ecde0446396cb0d4bdffda2b31867bebd86ca84" }
 survey-assist-utils = { git = "https://github.com/ONSdigital/survey-assist-utils.git", tag = "v0.0.8" }
 
 [tool.isort]

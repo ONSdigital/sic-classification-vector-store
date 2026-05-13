@@ -70,7 +70,7 @@ async def test_get_status_returns_status_response() -> None:
     vector_store_manager = _make_vector_store_manager(ready=True, embed=object())
     vector_store_manager.config_data = {
         "embedding_model_name": "all-MiniLM-L6-v2",
-        "db_dir": "src/sic_classification_vector_store/data/vector_store",
+        "db_dir": "test_vector_store",
         "index_source_file": "some_index_file.csv",
         "k_matches": expected_matches,
         "index_size": expected_index_size,
@@ -81,6 +81,6 @@ async def test_get_status_returns_status_response() -> None:
     assert isinstance(result, StatusResponse)
     assert result.status == "ready"
     assert result.embedding_model_name == "all-MiniLM-L6-v2"
-    assert result.db_dir == "src/sic_classification_vector_store/data/vector_store"
+    assert result.db_dir == "test_vector_store"
     assert result.k_matches == expected_matches
     assert result.index_size == expected_index_size

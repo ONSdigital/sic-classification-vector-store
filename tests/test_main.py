@@ -76,7 +76,7 @@ def test_get_status_loading():
 
 
 @pytest.mark.api
-def test_status_ready(monkeypatch):
+def test_status_ready(monkeypatch, tmp_path):
     """Test the `/v1/sic-vector-store/status` endpoint until the status is ready.
 
     This test periodically checks the status endpoint to wait for the vector store
@@ -92,6 +92,7 @@ def test_status_ready(monkeypatch):
     example_csv = os.path.join(os.path.dirname(__file__), "data", "example.csv")
     monkeypatch.setenv("INDEX_SOURCE_FILE", example_csv)
     monkeypatch.setattr(vs_module, "INDEX_SOURCE_FILE", example_csv)
+    monkeypatch.setattr(vs_module, "VECTOR_STORE_DIR", str(tmp_path))
     # The 'with' allows the vector store thread to run in the TestClient
     with TestClient(app) as client:  # pylint: disable=redefined-outer-name
         start_time = time.time()
