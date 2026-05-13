@@ -9,8 +9,8 @@ from survey_assist_utils.logging import get_logger
 
 from sic_classification_vector_store.api.models.search_index import (
     SearchIndexRequest,
-    SearchIndexResponse,
 )
+from industrial_classification_utils.embed import SearchIndexResponse
 from sic_classification_vector_store.utils.vector_store import vector_store_manager
 
 logger = get_logger(__name__)
@@ -41,7 +41,7 @@ async def post_search_index(
             job_description=payload.job_description,
         )
         logger.info("Search completed successfully")
-        return SearchIndexResponse(results=search_results)
+        return search_results
     except RuntimeError as e:
         logger.error(f"Vector store error: {e}", exc_info=True)
         raise HTTPException(
