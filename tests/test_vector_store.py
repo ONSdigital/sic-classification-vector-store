@@ -5,31 +5,25 @@ Unit tests for endpoints and utility functions in the vector store.
 
 import pytest
 
-from sic_classification_vector_store.utils.vector_store import load_vector_store
+from sic_classification_vector_store.utils.vector_store import VectorStoreManager
 
 
 @pytest.mark.utils
-def test_load_vector_store(mocker):
-    """Test the load_vector_store function."""
+def test_vector_store_manager_load(mocker):
+    """Test VectorStoreManager.load creates the EmbeddingHandler and fetches config."""
     mock_embed_handler = mocker.patch(
         "sic_classification_vector_store.utils.vector_store.EmbeddingHandler"
     )
     mock_embed_instance = mock_embed_handler.return_value
     mock_embed_instance.get_embed_config.return_value = {"status": "mocked"}
 
-    embed = load_vector_store()
+    manager = VectorStoreManager()
+    manager.load()
 
     mock_embed_handler.assert_called_once_with(
         db_dir="src/sic_classification_vector_store/data/vector_store",
-        sic_index_file=(
-            "sic_classification_vector_store.data.sic_index",
-            "uksic2007indexeswithaddendumdecember2022.xlsx",
-        ),
-        sic_structure_file=(
-            "sic_classification_vector_store.data.sic_index",
-            "publisheduksicsummaryofstructureworksheet.xlsx",
-        ),
+        index_source_file=None,
     )
-
     mock_embed_instance.get_embed_config.assert_called_once()
-    assert embed == mock_embed_instance
+    assert manager.embed == mock_embed_instance
+    assert manager.status == {"status": "mocked"}

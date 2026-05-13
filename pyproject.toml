@@ -93,3 +93,12 @@ pytest = "^8.3.5"
 httpx = "^0.28.1"
 pytest-mock = "^3.14.0"
 
+[tool.pylint]
+ignore = [".venv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+
+[tool.coverage.run]
+source = ['src']

@@ -21,19 +21,9 @@ vector_store_ready_event = Event()
 VECTOR_STORE_DIR = os.getenv(
     "VECTOR_STORE_DIR", "src/sic_classification_vector_store/data/vector_store"
 )
-
-def load_vector_store() -> EmbeddingHandler:
-    """Load the vector store."""
-    # Create the embeddings index
-    logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-    embed = EmbeddingHandler(
-        db_dir=VECTOR_STORE_DIR,
-    )
-    logger.info("Vector store loaded")
-    return embed
+INDEX_SOURCE_FILE = os.getenv("INDEX_SOURCE_FILE", None)
 
 
-# Create a simple manager class to maintain compatibility
 class VectorStoreManager:
     """Manager class for the vector store.
 
@@ -51,7 +41,11 @@ class VectorStoreManager:
     def load(self):
         """Load the vector store and update its status."""
         self.load_error = None
-        self.embed = load_vector_store()
+        logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
+        self.embed = EmbeddingHandler(
+            db_dir=VECTOR_STORE_DIR, index_source_file=INDEX_SOURCE_FILE
+        )
+        logger.info("Vector store loaded")
         self.status = self.embed.get_embed_config()
 
     def search(

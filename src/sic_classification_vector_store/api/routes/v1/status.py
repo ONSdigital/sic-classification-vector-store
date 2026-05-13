@@ -40,19 +40,16 @@ async def get_status(
     Returns:
         StatusResponse: A dictionary containing the current status.
     """
+    status_data = vector_store.status or {}
     status_resp = StatusResponse(
         status=_resolve_status(vector_store),
-        embedding_model_name=str(vector_store.status.get("embedding_model_name", "")),
-        db_dir=str(vector_store.status.get("db_dir", "")),
-        sic_index_source=_resolve_file_source(vector_store.status.get("sic_index", "")),
-        sic_structure_source=_resolve_file_source(
-            vector_store.status.get("sic_structure", "")
-        ),
-        sic_condensed_source=_resolve_file_source(
-            vector_store.status.get("sic_condensed", "")
-        ),
-        matches=safe_int(vector_store.status.get("matches", 0)),
-        index_size=safe_int(vector_store.status.get("index_size", 0)),
+        embedding_model_name=str(status_data.get("embedding_model_name", "")),
+        db_dir=str(status_data.get("db_dir", "")),
+        sic_index_source=_resolve_file_source(status_data.get("sic_index", "")),
+        sic_structure_source=_resolve_file_source(status_data.get("sic_structure", "")),
+        sic_condensed_source=_resolve_file_source(status_data.get("sic_condensed", "")),
+        matches=safe_int(status_data.get("matches", 0)),
+        index_size=safe_int(status_data.get("index_size", 0)),
     )
     return status_resp
 

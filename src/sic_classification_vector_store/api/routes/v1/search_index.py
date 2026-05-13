@@ -5,12 +5,12 @@ It defines the search endpoint and returns search results from the vector store.
 """
 
 from fastapi import APIRouter, HTTPException, Request
+from industrial_classification_utils.embed import SearchIndexResponse
 from survey_assist_utils.logging import get_logger
 
 from sic_classification_vector_store.api.models.search_index import (
     SearchIndexRequest,
 )
-from industrial_classification_utils.embed import SearchIndexResponse
 from sic_classification_vector_store.utils.vector_store import vector_store_manager
 
 logger = get_logger(__name__)
