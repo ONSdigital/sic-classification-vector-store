@@ -23,10 +23,10 @@ import pytest
 from fastapi.testclient import TestClient
 from survey_assist_utils.logging import get_logger
 
+import sic_classification_vector_store.utils.vector_store as vs_module
 from sic_classification_vector_store.api.main import (
     app,  # Adjust the import based on your project structure
 )
-import sic_classification_vector_store.utils.vector_store as vs_module
 
 logger = get_logger(__name__)
 client = TestClient(app)  # Create a test client for your FastAPI app
@@ -41,6 +41,7 @@ STATUS_RESPONSE_KEYS = {
     "k_matches",
     "index_size",
 }
+
 
 @pytest.mark.api
 def test_read_root():

@@ -5,6 +5,7 @@ Unit tests for endpoints and utility functions in the vector store.
 
 import pytest
 
+from sic_classification_vector_store.api.models.status import EmbeddingConfig
 from sic_classification_vector_store.utils.vector_store import VectorStoreManager
 
 
@@ -15,7 +16,12 @@ def test_vector_store_manager_load(mocker):
         "sic_classification_vector_store.utils.vector_store.EmbeddingHandler"
     )
     mock_embed_instance = mock_embed_handler.return_value
-    mock_embed_instance.get_embed_config.return_value = {"status": "mocked"}
+    mock_embed_instance.get_embed_config.return_value = EmbeddingConfig(
+        embedding_model_name="mocked",
+        db_dir="mocked",
+        index_source_file="mocked",
+        k_matches=10,
+    )
 
     manager = VectorStoreManager()
     manager.load()
@@ -25,4 +31,4 @@ def test_vector_store_manager_load(mocker):
     )
     mock_embed_instance.get_embed_config.assert_called_once()
     assert manager.embed == mock_embed_instance
-    assert manager.config_data == {"status": "mocked"}
+    assert manager.config_data["db_dir"] == "mocked"

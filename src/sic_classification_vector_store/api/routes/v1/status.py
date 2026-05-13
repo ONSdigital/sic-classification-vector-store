@@ -61,4 +61,5 @@ def _resolve_status(vector_store: VectorStoreManager) -> str:
 
     return "loading"
 
+
 # %%

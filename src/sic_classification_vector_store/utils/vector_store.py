@@ -47,8 +47,7 @@ class VectorStoreManager:
             kwargs["index_source_file"] = INDEX_SOURCE_FILE
         self.embed = EmbeddingHandler(**kwargs)
         logger.info("Vector store loaded")
-        config = self.embed.get_embed_config()
-        self.config_data = config.model_dump() if hasattr(config, "model_dump") else config
+        self.config_data = self.embed.get_embed_config().model_dump()
 
     def search(
         self, industry_descr: str = "", job_title: str = "", job_description: str = ""

@@ -84,5 +84,3 @@ async def test_get_status_returns_status_response() -> None:
     assert result.db_dir == "src/sic_classification_vector_store/data/vector_store"
     assert result.k_matches == expected_matches
     assert result.index_size == expected_index_size
-
-
