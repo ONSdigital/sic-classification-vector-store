@@ -3,10 +3,11 @@
 import time
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 from survey_assist_utils.logging import get_logger
 from survey_assist_utils.logging.logging_utils import SurveyAssistLogger
 
+from sic_classification_vector_store.api.deps import get_sayt_manager
 from sic_classification_vector_store.api.models.sayt import (
     SIC_SAYT_RESPONSE_EXAMPLE,
     SICSaytResponse,
@@ -15,11 +16,6 @@ from sic_classification_vector_store.utils.sayt import SaytManager
 
 router = APIRouter(tags=["SIC SAYT"])
 logger: SurveyAssistLogger = get_logger(__name__)
-
-
-def get_sayt_manager(request: Request) -> SaytManager:
-    """Get the warmed SAYT manager from FastAPI request state."""
-    return request.state.sayt_manager
 
 
 @router.get(

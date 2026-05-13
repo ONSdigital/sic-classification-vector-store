@@ -2,8 +2,9 @@
 
 import os
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from importlib import resources
-from importlib.resources.abc import Traversable
 from threading import Event
 
 from industrial_classification_utils.sayt import SAYTSuggester
@@ -11,30 +12,6 @@ from survey_assist_utils.logging import get_logger
 from survey_assist_utils.logging.logging_utils import SurveyAssistLogger
 
 logger: SurveyAssistLogger = get_logger(__name__)
-
-
-def resolve_sayt_data_path() -> str:
-    """Resolve the CSV path used to build the SIC SAYT suggester."""
-    env_path = os.getenv("SIC_LOOKUP_DATA_PATH")
-    if env_path and env_path.strip():
-        return env_path.strip()
-
-    try:
-        data_dir: Traversable = resources.files("industrial_classification.data")
-        resolved_path: Traversable = data_dir / "example_sic_lookup_data.csv"
-        logger.info("Using packaged SIC SAYT data", data_path=str(resolved_path))
-        return str(resolved_path)
-    except (ImportError, OSError) as e:
-        fallback_path: str = (
-            "/usr/local/lib/python3.12/site-packages/industrial_classification/"
-            "data/example_sic_lookup_data.csv"
-        )
-        logger.warning(
-            "Could not resolve packaged SIC SAYT data, using fallback",
-            data_path=fallback_path,
-            error=str(e),
-        )
-        return fallback_path
 
 
 class SaytManager:
@@ -45,25 +22,26 @@ class SaytManager:
         self.ready_event = Event()
         self.suggester: SAYTSuggester | None = None
         self.load_error: str | None = None
-        self.data_path: str = (
-            resolve_sayt_data_path() if data_path is None else str(data_path)
-        )
+        self.data_path: str | None = None if data_path is None else str(data_path)
 
     def load(self) -> None:
         """Build the underlying SAYT suggester."""
         self.load_error = None
 
         start_time = time.perf_counter()
-        logger.info("Loading SIC SAYT suggester", data_path=self.data_path)
-        self.suggester = SAYTSuggester.from_csv(
-            self.data_path,
-            search_text_col="description",
-            display_text_col="description",
-        )
+        with _resolve_sayt_data_file(self.data_path) as resolved_path:
+            active_data_path = str(resolved_path)
+            logger.info("Loading SIC SAYT suggester", data_path=active_data_path)
+            self.suggester = SAYTSuggester.from_csv(
+                resolved_path,
+                search_text_col="description",
+                display_text_col="description",
+            )
+
         duration_ms = int((time.perf_counter() - start_time) * 1000)
         logger.info(
             "Loaded SIC SAYT suggester",
-            data_path=self.data_path,
+            data_path=active_data_path,
             duration_ms=str(duration_ms),
         )
 
@@ -81,3 +59,43 @@ class SaytManager:
             raise RuntimeError("SAYT suggester not loaded")
 
         return self.suggester.suggest(description, num_suggestions)
+
+
+@contextmanager
+def _resolve_sayt_data_file(
+    data_path: str | os.PathLike | None,
+) -> Iterator[str | os.PathLike]:
+    """Yield a concrete CSV path for loading the SIC SAYT suggester."""
+    if data_path is not None:
+        yield data_path
+        return
+
+    env_path = os.getenv("SIC_LOOKUP_DATA_PATH")
+    if env_path and env_path.strip():
+        yield env_path.strip()
+        return
+
+    try:
+        packaged_data = (
+            resources.files("industrial_classification.data")
+            / "example_sic_lookup_data.csv"
+        )
+    except (ImportError, OSError) as e:
+        message = (
+            "Could not resolve packaged SIC SAYT data. "
+            "Set SIC_LOOKUP_DATA_PATH to override the CSV path."
+        )
+        logger.warning(message, error=str(e))
+        raise RuntimeError(message) from e
+
+    if not packaged_data.is_file():
+        message = (
+            "Packaged SIC SAYT data not found. "
+            "Set SIC_LOOKUP_DATA_PATH to override the CSV path."
+        )
+        logger.warning(message, data_path=str(packaged_data))
+        raise RuntimeError(message)
+
+    logger.info("Using packaged SIC SAYT data", data_path=str(packaged_data))
+    with resources.as_file(packaged_data) as resolved_path:
+        yield resolved_path

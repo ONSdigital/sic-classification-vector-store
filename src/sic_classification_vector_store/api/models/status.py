@@ -4,7 +4,17 @@ The models in this module are used to represent the response
 returned by the API.
 """
 
+from enum import StrEnum
+
 from pydantic import BaseModel
+
+
+class RuntimeStatus(StrEnum):
+    """Lifecycle status for a runtime-managed component."""
+
+    LOADING = "loading"
+    READY = "ready"
+    ERROR = "error"
 
 
 class FileSource(BaseModel):
@@ -30,10 +40,12 @@ class StatusResponse(BaseModel):
         sic_condensed_source (FileSource): The condensed SIC reference file.
         matches (int): The number of nearest matches initialised in the vector store.
         index_size (int): The number of embedded entries in the vector store.
-        status (str): The status of the vector store.
+        vector_store_status (str): The status of the vector store.
+        sayt_status (str): The status of the SIC search-as-you-type suggester.
     """
 
-    status: str
+    vector_store_status: RuntimeStatus
+    sayt_status: RuntimeStatus
     embedding_model_name: str
     db_dir: str
     sic_index_source: FileSource
