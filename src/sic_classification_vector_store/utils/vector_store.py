@@ -21,7 +21,6 @@ vector_store_ready_event = Event()
 VECTOR_STORE_DIR = os.getenv(
     "VECTOR_STORE_DIR", "src/sic_classification_vector_store/data/vector_store"
 )
-INDEX_SOURCE_FILE = os.getenv("INDEX_SOURCE_FILE", None)
 
 
 class VectorStoreManager:
@@ -42,10 +41,7 @@ class VectorStoreManager:
         """Load the vector store and update its status."""
         self.load_error = None
         logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-        kwargs = {"db_dir": VECTOR_STORE_DIR}
-        if INDEX_SOURCE_FILE:
-            kwargs["index_source_file"] = INDEX_SOURCE_FILE
-        self.embed = EmbeddingHandler(**kwargs)
+        self.embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)
         logger.info("Vector store loaded")
         self.config_data = self.embed.get_embed_config().model_dump()
 

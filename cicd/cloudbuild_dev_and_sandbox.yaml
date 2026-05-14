@@ -16,10 +16,9 @@ steps:
       - '-c'
       - |
         set -e
-        gsutil cp $_SIC_INDEX_FILE src/sic_classification_vector_store/data/sic_index/
-
         poetry install
         make all-tests
+        make build-vector-store
     id: Run Unit Tests
     entrypoint: bash
   - name: gcr.io/cloud-builders/docker

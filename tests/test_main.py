@@ -27,6 +27,9 @@ import sic_classification_vector_store.utils.vector_store as vs_module
 from sic_classification_vector_store.api.main import (
     app,  # Adjust the import based on your project structure
 )
+from sic_classification_vector_store.utils.build_vector_store_index import (
+    build_vector_store_index,
+)
 
 logger = get_logger(__name__)
 client = TestClient(app)  # Create a test client for your FastAPI app
@@ -90,8 +93,7 @@ def test_status_ready(monkeypatch, tmp_path):
     - Numeric fields (`k_matches`, `index_size`) are greater than 0.
     """
     example_csv = os.path.join(os.path.dirname(__file__), "data", "example.csv")
-    monkeypatch.setenv("INDEX_SOURCE_FILE", example_csv)
-    monkeypatch.setattr(vs_module, "INDEX_SOURCE_FILE", example_csv)
+    build_vector_store_index(db_dir=str(tmp_path), index_source_file=example_csv)
     monkeypatch.setattr(vs_module, "VECTOR_STORE_DIR", str(tmp_path))
     # The 'with' allows the vector store thread to run in the TestClient
     with TestClient(app) as client:  # pylint: disable=redefined-outer-name
@@ -109,7 +111,6 @@ def test_status_ready(monkeypatch, tmp_path):
                 assert set(data) == STATUS_RESPONSE_KEYS
                 assert data["db_dir"] not in ["unknown", "", None]
                 assert data["embedding_model_name"] not in ["unknown", "", None]
-                assert data["index_source_file"] not in ["unknown", "", None]
                 assert data["k_matches"] > 0
                 assert data["index_size"] > 0
                 break
