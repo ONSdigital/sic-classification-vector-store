@@ -64,7 +64,7 @@ colima start --cpu 4 --memory 8 --disk 100
 Build the docker image locally:
 
 ```bash
-docker build -t vector-store -f DOCKERFILE .
+docker build -t vector-store -f Dockerfile .
 ```
 
 or:
@@ -188,13 +188,20 @@ make all-tests
 
 #### Building or re-building the vector store
 
-The vector store is built from a csv index file which is defined by the ```SIC_INDEX_FILE``` environment variable.  This should be set to a csv file with a header and at least two columns, one for the `label` and one for the `text` to be embedded.  The default file used in development is ```./data/example.csv```.
+The vector store is built from a csv index file which is defined by the ```INDEX_SOURCE_FILE``` environment variable.  This should be set to a csv file with a header and at least two columns, one for the `label` and one for the `text` to be embedded.  The default file used in development is ```./data/example.csv```.
 
 The created vector store is stored in the directory defined by the ```VECTOR_STORE_DIR``` environment variable.  By default this is set to ```./data/vector_store```.  When the vector store is built, a ```vectors.parquet``` and ```metadata.json``` file are created in this directory. These embeddings can then be uploaded to GCS and subsequent runs can load the pre-built store using the guidance below.
 
+E.g:
+
+```bash
+export INDEX_SOURCE_FILE="gs://<bucket-name>/sic_vector_store_config/sic_extended_index_for_classifai.csv"
+export VECTOR_STORE_DIR="src/sic_classification_vector_store/data/vector_store"
+```
+
 #### Loading a pre-built store
 
-When the ```SIC_INDEX_FILE``` environment variable is not set, the vector store will attempt to load pre-built vector embeddings from ```VECTOR_STORE_DIR``` environment variable (this could be local or a GCS path).  
+When the ```INDEX_SOURCE_FILE``` environment variable is not set, the vector store will attempt to load pre-built vector embeddings from ```VECTOR_STORE_DIR``` environment variable (this could be local or a GCS path).  
 
 A ```vectors.parquet``` and ```metadata.json``` file must exist in the directory.
 
