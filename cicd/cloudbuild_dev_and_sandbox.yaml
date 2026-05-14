@@ -18,6 +18,7 @@ steps:
         set -e
         poetry install
         make all-tests
+        export INDEX_SOURCE_FILE=$_INDEX_SOURCE_FILE
         make build-vector-store
     id: Run Unit Tests
     entrypoint: bash
