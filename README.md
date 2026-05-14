@@ -61,7 +61,7 @@ Colima requires at least 4 CPUs, 8GB of memory and 100GB of disk space to run. Y
 colima start --cpu 4 --memory 8 --disk 100
 ```
 
-Build the docker image locally:
+Build the docker image locally (note the vector store embeddings need to exist prior to building the image):
 
 ```bash
 docker build -t vector-store -f Dockerfile .
