@@ -1,11 +1,12 @@
 """Unit tests for the status route helpers."""
 
 from threading import Event
+from types import SimpleNamespace
 from typing import Any, cast
 
 import pytest
 
-from sic_classification_vector_store.api.models.status import StatusResponse
+from industrial_classification_utils.models.config_model import EmbeddingStatus
 from sic_classification_vector_store.api.routes.v1.status import (
     _resolve_status,
     get_status,
@@ -27,6 +28,16 @@ def _make_vector_store_manager(
     vector_store_manager.ready_event = Event()
     if ready:
         vector_store_manager.ready_event.set()
+    if embed is not None:
+        embed = SimpleNamespace(
+            get_embed_config=lambda: EmbeddingStatus(
+            status="ready",
+            embedding_model_name="all-MiniLM-L6-v2",
+            db_dir="test_vector_store",
+            k_matches=20,
+            index_size=16618,
+        )
+        )
     vector_store_manager.embed = cast(Any, embed)
     vector_store_manager.load_error = load_error
     return vector_store_manager
@@ -68,17 +79,10 @@ async def test_get_status_returns_status_response() -> None:
     expected_index_size = 16618
 
     vector_store_manager = _make_vector_store_manager(ready=True, embed=object())
-    vector_store_manager.config_data = {
-        "embedding_model_name": "all-MiniLM-L6-v2",
-        "db_dir": "test_vector_store",
-        "index_source_file": "some_index_file.csv",
-        "k_matches": expected_matches,
-        "index_size": expected_index_size,
-    }
 
     result = await get_status(vector_store_manager)
 
-    assert isinstance(result, StatusResponse)
+    assert isinstance(result, EmbeddingStatus)
     assert result.status == "ready"
     assert result.embedding_model_name == "all-MiniLM-L6-v2"
     assert result.db_dir == "test_vector_store"

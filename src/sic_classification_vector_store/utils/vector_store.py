@@ -34,16 +34,14 @@ class VectorStoreManager:
         """Initialise the vector store manager."""
         self.ready_event = vector_store_ready_event
         self.embed = None
-        self.config_data = None
         self.load_error: str | None = None
 
     def load(self):
         """Load the vector store and update its status."""
         self.load_error = None
         logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-        self.embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)
+        self.embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)        
         logger.info("Vector store loaded")
-        self.config_data = self.embed.get_embed_config().model_dump()
 
     def search(
         self, industry_descr: str = "", job_title: str = "", job_description: str = ""
