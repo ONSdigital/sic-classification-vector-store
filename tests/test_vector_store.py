@@ -4,9 +4,9 @@ Unit tests for endpoints and utility functions in the vector store.
 """
 
 import pytest
+from industrial_classification_utils.models.config_model import EmbeddingConfig
 
 import sic_classification_vector_store.utils.vector_store as vs_module
-from industrial_classification_utils.models.config_model import EmbeddingConfig
 from sic_classification_vector_store.utils.vector_store import VectorStoreManager
 
 
@@ -32,6 +32,6 @@ def test_vector_store_manager_load(mocker, monkeypatch, tmp_path):
     mock_embed_handler.assert_called_once_with(
         db_dir=str(tmp_path),
     )
-    mock_embed_instance.get_embed_config.assert_not_called()  # Config is fetched in load, not get_status
+    mock_embed_instance.get_embed_config.assert_not_called()
     assert manager.embed == mock_embed_instance
     assert manager.embed.get_embed_config().db_dir == str(tmp_path)

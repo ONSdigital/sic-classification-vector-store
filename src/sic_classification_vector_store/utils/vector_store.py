@@ -40,7 +40,7 @@ class VectorStoreManager:
         """Load the vector store and update its status."""
         self.load_error = None
         logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-        self.embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)        
+        self.embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)
         logger.info("Vector store loaded")
 
     def search(

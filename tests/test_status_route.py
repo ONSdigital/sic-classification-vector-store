@@ -5,8 +5,8 @@ from types import SimpleNamespace
 from typing import Any, cast
 
 import pytest
-
 from industrial_classification_utils.models.config_model import EmbeddingStatus
+
 from sic_classification_vector_store.api.routes.v1.status import (
     _resolve_status,
     get_status,
@@ -31,12 +31,12 @@ def _make_vector_store_manager(
     if embed is not None:
         embed = SimpleNamespace(
             get_embed_config=lambda: EmbeddingStatus(
-            status="ready",
-            embedding_model_name="all-MiniLM-L6-v2",
-            db_dir="test_vector_store",
-            k_matches=20,
-            index_size=16618,
-        )
+                status="ready",
+                embedding_model_name="all-MiniLM-L6-v2",
+                db_dir="test_vector_store",
+                k_matches=20,
+                index_size=16618,
+            )
         )
     vector_store_manager.embed = cast(Any, embed)
     vector_store_manager.load_error = load_error

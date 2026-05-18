@@ -7,9 +7,8 @@ It defines the configuration endpoint and returns the current configuration sett
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-
 from industrial_classification_utils.models.config_model import EmbeddingStatus
-from sic_classification_vector_store.utils.common import safe_int
+
 from sic_classification_vector_store.utils.vector_store import (
     VectorStoreManager,
     vector_store_manager,
@@ -38,7 +37,7 @@ async def get_status(
 
     Returns:
         EmbeddingStatus: A dictionary containing the current status.
-    """    
+    """
     status_str = _resolve_status(vector_store)
     if status_str == "ready" and vector_store.embed is not None:
         return vector_store.embed.get_embed_config()
