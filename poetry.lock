@@ -5405,8 +5405,8 @@ survey-assist-utils = {git = "https://github.com/ONSdigital/survey-assist-utils.
 [package.source]
 type = "git"
 url = "https://github.com/ONSdigital/sic-classification-utils"
-reference = "a814ab4"
-resolved_reference = "a814ab4d8dc660c7402ce79cfc03b77acb2d7808"
+reference = "v0.1.13"
+resolved_reference = "0de9621707484fd29e996d7c8dbb43fe4a9b8183"
 
 [[package]]
 name = "six"
@@ -6827,4 +6827,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "154c00f31037984a35f95d328c5a62b1c9fda6c53e826328f9b284ea4cf41afa"
+content-hash = "fb55e881577f73253b445067cf138aca516d809fde7cd50ec79a1b1ffb6a5075"
