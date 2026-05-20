@@ -210,3 +210,7 @@ E.g:
 export VECTOR_STORE_DIR="gs://<bucket-name>/sic_vector_store_config/vector_store"
 make run-vector-store
 ```
+
+**Default Behavior:** If `VECTOR_STORE_DIR` is not set, the API loads from the default local path: `src/sic_classification_vector_store/data/vector_store`. This is the standard deployment approach—the vector store is built locally, then copied into the container image at build time (see [CICD](./cicd/cloudbuild_dev_and_sandbox.yaml)).
+
+**GCS Path Alternative:** For testing purposes, you can override the default and load from a GCS path at runtime by setting the `VECTOR_STORE_DIR` environment variable during the cloud run deployment step.
