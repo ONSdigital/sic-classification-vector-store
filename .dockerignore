@@ -1,34 +1,14 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*.so
+# Ignore everything by default
+*
 
-# Tests
-tests/
-pytest.ini
+# Allow dependency files
+!pyproject.toml
+!poetry.lock
 
-# Documentation
-docs/
-mkdocs.yml
+# Allow application source
+!src/
+!src/sic_classification_vector_store/
+!src/sic_classification_vector_store/**
 
-# Local dev and build files
-*.log
-*.md
-Makefile
-CODEOWNERS
-
-# Python environment files
-.venv/
-.cache/
-*.egg-info/
-dist/
-build/
-
-# OS and editor junk files
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-
-# Vector Store Data
-src/sic_classification_vector_store/data/vector_store/
+# Exclude cache files
+**/__pycache__/

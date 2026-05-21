@@ -6,9 +6,9 @@ This module contains utility functions to manage the vector store interface.
 import os
 from threading import Event
 
-from industrial_classification_utils.embed.embedding import (
+from industrial_classification_utils.embed import (
     EmbeddingHandler,
-    embedding_config,
+    SearchIndexResponse,
 )
 from survey_assist_utils.logging import get_logger
 
@@ -16,50 +16,13 @@ logger = get_logger(__name__, level="DEBUG")
 
 # Shared variables and events
 vector_store_ready_event = Event()
-vector_store_status = embedding_config
 
 # Configuration from environment variables with defaults
 VECTOR_STORE_DIR = os.getenv(
     "VECTOR_STORE_DIR", "src/sic_classification_vector_store/data/vector_store"
 )
-SIC_INDEX_FILE = os.getenv(
-    "SIC_INDEX_FILE",
-    "uksic2007indexeswithaddendumdecember2022.xlsx",
-)
-SIC_STRUCTURE_FILE = os.getenv(
-    "SIC_STRUCTURE_FILE",
-    "publisheduksicsummaryofstructureworksheet.xlsx",
-)
-
-# Reference paths for the index and structure files
-PATH_REF = "sic_classification_vector_store.data.sic_index"
-SIC_INDEX_TUPLE = (PATH_REF, SIC_INDEX_FILE)
-SIC_STRUCTURE_TUPLE = (PATH_REF, SIC_STRUCTURE_FILE)
 
 
-def load_vector_store() -> EmbeddingHandler:
-    """Load the vector store."""
-    # Create the embeddings index
-    logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-    embed = EmbeddingHandler(
-        db_dir=VECTOR_STORE_DIR,
-        sic_index_file=SIC_INDEX_TUPLE,
-        sic_structure_file=SIC_STRUCTURE_TUPLE,
-    )
-
-    logger.info(f"Loading the vector store - sic_index_file: {SIC_INDEX_TUPLE}")
-    logger.info(f"Loading the vector store - sic_structure_file: {SIC_STRUCTURE_TUPLE}")
-
-    vector_store_status = (  # pylint: disable=redefined-outer-name
-        embed.get_embed_config()
-    )
-
-    logger.info(f"Vector store status: {vector_store_status}")
-    logger.info("Vector store loaded")
-    return embed
-
-
-# Create a simple manager class to maintain compatibility
 class VectorStoreManager:
     """Manager class for the vector store.
 
@@ -70,19 +33,19 @@ class VectorStoreManager:
     def __init__(self):
         """Initialise the vector store manager."""
         self.ready_event = vector_store_ready_event
-        self.status = vector_store_status
         self.embed = None
         self.load_error: str | None = None
 
     def load(self):
         """Load the vector store and update its status."""
         self.load_error = None
-        self.embed = load_vector_store()
-        self.status = self.embed.get_embed_config()
+        logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
+        self.embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)
+        logger.info("Vector store loaded")
 
     def search(
         self, industry_descr: str = "", job_title: str = "", job_description: str = ""
-    ):
+    ) -> SearchIndexResponse:
         """Search the vector store with the given parameters.
 
         Args:

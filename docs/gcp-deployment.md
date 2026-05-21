@@ -2,6 +2,8 @@
 
 This guide covers the deployment of the SIC Classification Vector Store to Google Cloud Platform (GCP) using Cloud Run.
 
+Note the CI/CD pipeline is configured for automated deployments, see the [CI/CD steps](./cicd/cloudbuild_dev_and_sandbox.yaml), so this guide focuses on manual deployment steps. 
+
 ## Prerequisites
 
 - Google Cloud CLI (`gcloud`) installed and authenticated
@@ -92,7 +94,8 @@ gcloud run services describe sic-classification-vector-store \
 
 The service uses these environment variables:
 
-- `VECTOR_STORE_DIR`: Path to vector store data (set automatically)
+- `VECTOR_STORE_DIR`: Path to vector store data. It will use a default 
+        local path included in the image if not set.
 - `HF_HOME`: HuggingFace model cache directory
 
 ### 4.2 Service Account Permissions
@@ -133,7 +136,7 @@ curl "https://[SERVICE_URL]/"
 # Check if vector store is ready
 curl "https://[SERVICE_URL]/v1/sic-vector-store/status"
 
-# Expected: {"status": "ready", "matches": 20, "index_size": 16618}
+# Expected: {"status":"ready","embedding_model_name":"all-MiniLM-L6-v2","db_dir":"sic_classification_vector_store/data/vector_store","index_source_file":"gs://survey-assist-sandbox-cloud-run-services/sic_vector_store_config/data/sic_kb_for_classifai.csv","k_matches":20,"index_size":34458}
 ```
 
 ### 5.4 Test Search Functionality
@@ -179,8 +182,6 @@ curl -X POST \
             "distance": 0.0,
             "title": "string",
             "code": "string",
-            "four_digit_code": "string",
-            "two_digit_code": "string"
         }
     ]
 }

@@ -15,6 +15,7 @@ Dependencies:
     - http.HTTPStatus: Provides standard HTTP status codes for assertions.
 """
 
+import os
 import time
 from http import HTTPStatus
 
@@ -22,8 +23,12 @@ import pytest
 from fastapi.testclient import TestClient
 from survey_assist_utils.logging import get_logger
 
+import sic_classification_vector_store.utils.vector_store as vs_module
 from sic_classification_vector_store.api.main import (
     app,  # Adjust the import based on your project structure
+)
+from sic_classification_vector_store.utils.build_vector_store_index import (
+    build_vector_store_index,
 )
 
 logger = get_logger(__name__)
@@ -35,20 +40,10 @@ STATUS_RESPONSE_KEYS = {
     "status",
     "embedding_model_name",
     "db_dir",
-    "sic_index_source",
-    "sic_structure_source",
-    "sic_condensed_source",
-    "matches",
+    "index_source_file",
+    "k_matches",
     "index_size",
 }
-FILE_SOURCE_KEYS = {"package", "file"}
-
-
-def _assert_file_source(file_source: dict[str, str]) -> None:
-    """Assert the nested file source payload matches the API contract."""
-    assert set(file_source) == FILE_SOURCE_KEYS
-    assert isinstance(file_source["package"], str)
-    assert isinstance(file_source["file"], str)
 
 
 @pytest.mark.api
@@ -81,20 +76,10 @@ def test_get_status_loading():
     assert response.status_code == HTTPStatus.OK
     assert data["status"] == "loading"
     assert set(data) == STATUS_RESPONSE_KEYS
-    assert data["embedding_model_name"] is not None
-    assert isinstance(data["embedding_model_name"], str)
-    assert isinstance(data["db_dir"], str)
-    _assert_file_source(data["sic_index_source"])
-    _assert_file_source(data["sic_structure_source"])
-    _assert_file_source(data["sic_condensed_source"])
-    assert isinstance(data["matches"], int)
-    assert isinstance(data["index_size"], int)
-    assert data["matches"] >= 0
-    assert data["index_size"] >= 0
 
 
 @pytest.mark.api
-def test_status_ready():
+def test_status_ready(monkeypatch, tmp_path):
     """Test the `/v1/sic-vector-store/status` endpoint until the status is ready.
 
     This test periodically checks the status endpoint to wait for the vector store
@@ -105,8 +90,11 @@ def test_status_ready():
     - The response status code is HTTPStatus.OK.
     - The `status` in the response JSON is "ready".
     - None of the status fields are "unknown".
-    - Numeric fields (`matches`, `index_size`) are greater than 0.
+    - Numeric fields (`k_matches`, `index_size`) are greater than 0.
     """
+    example_csv = os.path.join(os.path.dirname(__file__), "data", "example.csv")
+    build_vector_store_index(db_dir=str(tmp_path), index_source_file=example_csv)
+    monkeypatch.setattr(vs_module, "VECTOR_STORE_DIR", str(tmp_path))
     # The 'with' allows the vector store thread to run in the TestClient
     with TestClient(app) as client:  # pylint: disable=redefined-outer-name
         start_time = time.time()
@@ -120,17 +108,10 @@ def test_status_ready():
                 pytest.fail("The vector store reported an error during startup.")
 
             if data["status"] == "ready":
-                # Verify that none of the fields are "unknown" or 0
                 assert set(data) == STATUS_RESPONSE_KEYS
-                assert data["embedding_model_name"] != "unknown"
-                assert data["db_dir"] != "unknown"
-                _assert_file_source(data["sic_index_source"])
-                _assert_file_source(data["sic_structure_source"])
-                _assert_file_source(data["sic_condensed_source"])
-                assert data["sic_index_source"]["file"] != "unknown"
-                assert data["sic_structure_source"]["file"] != "unknown"
-                assert data["sic_condensed_source"]["file"] != "unknown"
-                assert data["matches"] > 0
+                assert data["db_dir"] not in ["unknown", "", None]
+                assert data["embedding_model_name"] not in ["unknown", "", None]
+                assert data["k_matches"] > 0
                 assert data["index_size"] > 0
                 break
 

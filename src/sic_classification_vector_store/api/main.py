@@ -29,9 +29,6 @@ async def lifespan(_app: FastAPI):
             logger.info("Loading the vector store")
             vector_store_manager.load()
             vector_store_manager.ready_event.set()
-            # Ensure matches is > 0 when ready
-            if vector_store_manager.status["matches"] == 0:
-                vector_store_manager.status["matches"] = 1
             logger.info("Vector store is ready")
         except Exception as e:  # pylint: disable=broad-exception-caught
             vector_store_manager.load_error = str(e)

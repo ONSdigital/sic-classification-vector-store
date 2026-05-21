@@ -45,7 +45,7 @@ To run locally execute:
 make run-vector-store
 ```
 
-**Note:** The vector store embeddings can take a while (up to 10 minutes) to compute. The vector store will be ready to search when the /status API endpoint returns a status of "ready" and application logging will report "Vector store is ready".
+**Note:** The vector store will be ready to search when the `/status` API endpoint returns a status of `"ready"` and application logging reports `"Vector store is ready"`. The app loads a pre-built vector store from `VECTOR_STORE_DIR`. See below for guidance on environment variables and how to build the store from a CSV index file.
 
 ### Docker
 
@@ -61,10 +61,10 @@ Colima requires at least 4 CPUs, 8GB of memory and 100GB of disk space to run. Y
 colima start --cpu 4 --memory 8 --disk 100
 ```
 
-Build the docker image locally:
+Build the docker image locally (note the vector store embeddings need to exist prior to building the image):
 
 ```bash
-docker build -t vector-store -f DOCKERFILE .
+docker build -t vector-store -f Dockerfile .
 ```
 
 or:
@@ -166,7 +166,7 @@ make run-docs
 
 Pytest is used for testing alongside pytest-cov for coverage testing.  [/tests/conftest.py](/tests/conftest.py) defines config used by the tests.
 
-API testing is added to the [/tests/tests_api.py](./tests/tests_api.py)
+API testing is added to the [/tests/test_main.py](./tests/test_main.py)
 
 ```bash
 make api-tests
@@ -186,23 +186,27 @@ make all-tests
 
 ### Environment Variables
 
-#### Building or re-building the vector store
+#### Building the vector store
 
-The vector store is built from a referenced index file, this could be the published sic index xls or a besoke version. 
+The vector store is built separately from running the API, using the `build-vector-store` make target. The build script reads ```INDEX_SOURCE_FILE```, which should point to a CSV file with a header and at least two columns: one for the `label` and one for the `text` to be embedded.
 
-Set the ```SIC_INDEX_FILE``` to the appropriate sheet and ensure ```VECTOR_STORE_DIR``` is **NOT** set to build the embeddings in the repo ```data/vector_store``` directory.  
+The built vector store is written to the directory defined by ```VECTOR_STORE_DIR``` (default: ```src/sic_classification_vector_store/data/vector_store```). This produces ```vectors.parquet``` and ```metadata.json``` files. These can then be committed or uploaded to GCS for use at runtime.
 
-These embeddings can then be uploaded to GCS and subsequent runs can load the pre-built store using the guidance below.
+E.g:
+
+```bash
+export INDEX_SOURCE_FILE="gs://<bucket-name>/sic_vector_store_config/sic_extended_index_for_classifai.csv"
+export VECTOR_STORE_DIR="src/sic_classification_vector_store/data/vector_store"
+make build-vector-store
+```
 
 #### Loading a pre-built store
 
-When loading pre-built vector embeddings from GCS the set the VECTOR_STORE_DIR environment variable.
-
-A ```vectors.parquet``` and ```metadata.json``` file must exist in the directory.
-
+At runtime the API always loads pre-built vector embeddings from the directory defined by ```VECTOR_STORE_DIR``` (this can be a local path or a GCS path). A ```vectors.parquet``` and ```metadata.json``` file must exist in that directory.
 
 E.g:
 
 ```bash
 export VECTOR_STORE_DIR="gs://<bucket-name>/sic_vector_store_config/vector_store"
+make run-vector-store
 ```

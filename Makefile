@@ -13,6 +13,10 @@ clean: ## Clean the temporary files.
 # Make does not like interpreting : in the target name, so we use a variable
 API_CMD=poetry run uvicorn sic_classification_vector_store.api.main:app --host 0.0.0.0 --port 8088 --reload
 
+.PHONY: build-vector-store
+build-vector-store: ## Build the vector store
+	poetry run python src/sic_classification_vector_store/utils/build_vector_store_index.py
+
 .PHONY: run-vector-store
 run-vector-store: ## Run the vectore store and API
 	$(API_CMD)

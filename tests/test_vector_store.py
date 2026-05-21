@@ -4,32 +4,34 @@ Unit tests for endpoints and utility functions in the vector store.
 """
 
 import pytest
+from industrial_classification_utils.models.config_model import EmbeddingConfig
 
-from sic_classification_vector_store.utils.vector_store import load_vector_store
+import sic_classification_vector_store.utils.vector_store as vs_module
+from sic_classification_vector_store.utils.vector_store import VectorStoreManager
 
 
 @pytest.mark.utils
-def test_load_vector_store(mocker):
-    """Test the load_vector_store function."""
+def test_vector_store_manager_load(mocker, monkeypatch, tmp_path):
+    """Test VectorStoreManager.load creates the EmbeddingHandler and fetches config."""
+    monkeypatch.setattr(vs_module, "VECTOR_STORE_DIR", str(tmp_path))
+
     mock_embed_handler = mocker.patch(
         "sic_classification_vector_store.utils.vector_store.EmbeddingHandler"
     )
     mock_embed_instance = mock_embed_handler.return_value
-    mock_embed_instance.get_embed_config.return_value = {"status": "mocked"}
-
-    embed = load_vector_store()
-
-    mock_embed_handler.assert_called_once_with(
-        db_dir="src/sic_classification_vector_store/data/vector_store",
-        sic_index_file=(
-            "sic_classification_vector_store.data.sic_index",
-            "uksic2007indexeswithaddendumdecember2022.xlsx",
-        ),
-        sic_structure_file=(
-            "sic_classification_vector_store.data.sic_index",
-            "publisheduksicsummaryofstructureworksheet.xlsx",
-        ),
+    mock_embed_instance.get_embed_config.return_value = EmbeddingConfig(
+        embedding_model_name="mocked",
+        db_dir=str(tmp_path),
+        index_source_file="mocked",
+        k_matches=10,
     )
 
-    mock_embed_instance.get_embed_config.assert_called_once()
-    assert embed == mock_embed_instance
+    manager = VectorStoreManager()
+    manager.load()
+
+    mock_embed_handler.assert_called_once_with(
+        db_dir=str(tmp_path),
+    )
+    mock_embed_instance.get_embed_config.assert_not_called()
+    assert manager.embed == mock_embed_instance
+    assert manager.embed.get_embed_config().db_dir == str(tmp_path)

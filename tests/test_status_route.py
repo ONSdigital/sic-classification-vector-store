@@ -1,13 +1,13 @@
 """Unit tests for the status route helpers."""
 
 from threading import Event
+from types import SimpleNamespace
 from typing import Any, cast
 
 import pytest
+from industrial_classification_utils.models.config_model import EmbeddingStatus
 
-from sic_classification_vector_store.api.models.status import StatusResponse
 from sic_classification_vector_store.api.routes.v1.status import (
-    _resolve_file_source,
     _resolve_status,
     get_status,
     get_vector_store,
@@ -28,6 +28,16 @@ def _make_vector_store_manager(
     vector_store_manager.ready_event = Event()
     if ready:
         vector_store_manager.ready_event.set()
+    if embed is not None:
+        embed = SimpleNamespace(
+            get_embed_config=lambda: EmbeddingStatus(
+                status="ready",
+                embedding_model_name="all-MiniLM-L6-v2",
+                db_dir="test_vector_store",
+                k_matches=20,
+                index_size=16618,
+            )
+        )
     vector_store_manager.embed = cast(Any, embed)
     vector_store_manager.load_error = load_error
     return vector_store_manager
@@ -69,98 +79,12 @@ async def test_get_status_returns_status_response() -> None:
     expected_index_size = 16618
 
     vector_store_manager = _make_vector_store_manager(ready=True, embed=object())
-    vector_store_manager.status = {
-        "embedding_model_name": "all-MiniLM-L6-v2",
-        "db_dir": "src/sic_classification_vector_store/data/vector_store",
-        "sic_index": (
-            "sic_classification_vector_store.data.sic_index",
-            "uksic2007indexeswithaddendumdecember2022.xlsx",
-        ),
-        "sic_structure": (
-            "sic_classification_vector_store.data.sic_index",
-            "publisheduksicsummaryofstructureworksheet.xlsx",
-        ),
-        "sic_condensed": (
-            "industrial_classification_utils.data.example",
-            "sic_2d_condensed.txt",
-        ),
-        "matches": expected_matches,
-        "index_size": expected_index_size,
-    }
 
     result = await get_status(vector_store_manager)
 
-    assert isinstance(result, StatusResponse)
+    assert isinstance(result, EmbeddingStatus)
     assert result.status == "ready"
     assert result.embedding_model_name == "all-MiniLM-L6-v2"
-    assert result.db_dir == "src/sic_classification_vector_store/data/vector_store"
-    assert (
-        result.sic_index_source.package
-        == "sic_classification_vector_store.data.sic_index"
-    )
-    assert (
-        result.sic_index_source.file == "uksic2007indexeswithaddendumdecember2022.xlsx"
-    )
-    assert (
-        result.sic_structure_source.package
-        == "sic_classification_vector_store.data.sic_index"
-    )
-    assert (
-        result.sic_structure_source.file
-        == "publisheduksicsummaryofstructureworksheet.xlsx"
-    )
-    assert (
-        result.sic_condensed_source.package
-        == "industrial_classification_utils.data.example"
-    )
-    assert result.sic_condensed_source.file == "sic_2d_condensed.txt"
-    assert result.matches == expected_matches
+    assert result.db_dir == "test_vector_store"
+    assert result.k_matches == expected_matches
     assert result.index_size == expected_index_size
-
-
-def test_resolve_file_source_parses_tuple_string() -> None:
-    """Tuple-like strings should be converted into structured file sources."""
-    result = _resolve_file_source(
-        "('sic_classification_vector_store.data.sic_index', "
-        "'uksic2007indexeswithaddendumdecember2022.xlsx')"
-    )
-
-    assert result.package == "sic_classification_vector_store.data.sic_index"
-    assert result.file == "uksic2007indexeswithaddendumdecember2022.xlsx"
-
-
-def test_resolve_file_source_parses_tuple_value() -> None:
-    """Tuple values should be converted into structured file sources."""
-    result = _resolve_file_source(
-        (
-            "sic_classification_vector_store.data.sic_index",
-            "uksic2007indexeswithaddendumdecember2022.xlsx",
-        )
-    )
-
-    assert result.package == "sic_classification_vector_store.data.sic_index"
-    assert result.file == "uksic2007indexeswithaddendumdecember2022.xlsx"
-
-
-def test_resolve_file_source_falls_back_to_raw_string() -> None:
-    """Non-tuple strings should be returned as raw file values."""
-    result = _resolve_file_source("not-a-tuple")
-
-    assert result.package == "unknown"
-    assert result.file == "not-a-tuple"
-
-
-def test_resolve_file_source_falls_back_to_original_string_after_parsing() -> None:
-    """Parsed non-tuple string values should still return the original raw string."""
-    result = _resolve_file_source("['not', 'a', 'tuple']")
-
-    assert result.package == "unknown"
-    assert result.file == "['not', 'a', 'tuple']"
-
-
-def test_resolve_file_source_returns_unknown_for_unusable_tuple_value() -> None:
-    """Tuple values with the wrong shape should return the unknown fallback."""
-    result = _resolve_file_source(("too", "many", "values"))
-
-    assert result.package == "unknown"
-    assert result.file == "unknown"
