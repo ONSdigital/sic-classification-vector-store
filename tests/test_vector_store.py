@@ -14,6 +14,8 @@ from sic_classification_vector_store.utils.vector_store import VectorStoreManage
 def test_vector_store_manager_load(mocker, monkeypatch, tmp_path):
     """Test VectorStoreManager.load creates the EmbeddingHandler and fetches config."""
     monkeypatch.setattr(vs_module, "VECTOR_STORE_DIR", str(tmp_path))
+    monkeypatch.setattr(vs_module, "EMBEDDING_BACKEND", "sentence-transformers")
+    monkeypatch.setattr(vs_module, "EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
 
     mock_embed_handler = mocker.patch(
         "sic_classification_vector_store.utils.vector_store.EmbeddingHandler"
@@ -21,6 +23,7 @@ def test_vector_store_manager_load(mocker, monkeypatch, tmp_path):
     mock_embed_instance = mock_embed_handler.return_value
     mock_embed_instance.get_embed_config.return_value = EmbeddingConfig(
         embedding_model_name="mocked",
+        embedding_backend="mocked",
         db_dir=str(tmp_path),
         index_source_file="mocked",
         k_matches=10,
@@ -31,7 +34,8 @@ def test_vector_store_manager_load(mocker, monkeypatch, tmp_path):
 
     mock_embed_handler.assert_called_once_with(
         db_dir=str(tmp_path),
+        embedding_backend="sentence-transformers",
+        embedding_model_name="all-MiniLM-L6-v2",
     )
     mock_embed_instance.get_embed_config.assert_not_called()
     assert manager.embed == mock_embed_instance
-    assert manager.embed.get_embed_config().db_dir == str(tmp_path)

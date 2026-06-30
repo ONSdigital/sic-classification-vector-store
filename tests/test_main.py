@@ -39,6 +39,7 @@ POLL_INTERVAL = 10  # Poll every 10 seconds
 STATUS_RESPONSE_KEYS = {
     "status",
     "embedding_model_name",
+    "embedding_backend",
     "db_dir",
     "index_source_file",
     "k_matches",
