@@ -24,8 +24,8 @@ ENV POETRY_VERSION=2.1.1 \
     PYTHONUNBUFFERED=1 \
     HF_HOME="/app/models" \
     VECTOR_STORE_DIR="sic_classification_vector_store/data/vector_store" \
-    EMBEDDING_BACKEND="sentence-transformers" \
-    EMBEDDING_MODEL_NAME="all-MiniLM-L6-v2"
+    EMBEDDING_BACKEND="light-embed-onnx" \
+    EMBEDDING_MODEL_NAME="onnx-models/all-MiniLM-L6-v2-onnx"
 
 # Set PATH after POETRY_HOME is defined
 ENV PATH="$POETRY_HOME/bin:$PATH"
