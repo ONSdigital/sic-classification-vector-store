@@ -12,6 +12,7 @@ from sic_classification_vector_store.api.models.search_index import (
     SearchIndexRequest,
 )
 from sic_classification_vector_store.utils.vector_store import vector_store_manager
+from time import perf_counter
 
 logger = get_logger(__name__)
 
@@ -35,12 +36,15 @@ async def post_search_index(
         HTTPException: If the vector store is not ready or there is an error searching
     """
     try:
+        started = perf_counter()
+        logger.info(f"Searching for {payload.industry_descr=}, {payload.job_title=}, {payload.job_description=}")
+
         search_results = vector_store_manager.search(
             industry_descr=payload.industry_descr,
             job_title=payload.job_title,
             job_description=payload.job_description,
         )
-        logger.info("Search completed successfully")
+        logger.info(f"Search completed successfully in {perf_counter() - started:.2f}s")
         return search_results
     except RuntimeError as e:
         logger.error(f"Vector store error: {e}", exc_info=True)

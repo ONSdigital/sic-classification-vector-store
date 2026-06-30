@@ -9,10 +9,14 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
         curl && \
-    pip install --no-cache-dir sentence-transformers && \
-    python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')" && \
-    apt-get purge -y curl && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+        pip install --no-cache-dir sentence-transformers light-embed && \
+        python - <<'PY'
+from sentence_transformers import SentenceTransformer
+from light_embed import TextEmbedding
+
+SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+TextEmbedding(model_name_or_path="onnx-models/all-MiniLM-L6-v2-onnx")
+PY
 
 # ---------- Stage 2: Build Application Image ----------
 FROM python:3.12-slim
@@ -23,7 +27,9 @@ ENV POETRY_VERSION=2.1.1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     HF_HOME="/app/models" \
-    VECTOR_STORE_DIR="sic_classification_vector_store/data/vector_store"
+    VECTOR_STORE_DIR="sic_classification_vector_store/data/vector_store" \
+    EMBEDDING_BACKEND="sentence-transformers" \
+    EMBEDDING_MODEL_NAME="all-MiniLM-L6-v2"
 
 # Set PATH after POETRY_HOME is defined
 ENV PATH="$POETRY_HOME/bin:$PATH"

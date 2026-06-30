@@ -11,6 +11,10 @@ from industrial_classification_utils.embed import (
     SearchIndexResponse,
 )
 from survey_assist_utils.logging import get_logger
+from time import perf_counter
+
+EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", None)
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", None)
 
 logger = get_logger(__name__, level="DEBUG")
 
@@ -39,9 +43,15 @@ class VectorStoreManager:
     def load(self):
         """Load the vector store and update its status."""
         self.load_error = None
-        logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR}")
-        self.embed = EmbeddingHandler(db_dir=VECTOR_STORE_DIR)
-        logger.info("Vector store loaded")
+        started = perf_counter()
+        logger.info(f"Loading the vector store - db_dir: {VECTOR_STORE_DIR} backend: {EMBEDDING_BACKEND} model: {EMBEDDING_MODEL_NAME}")
+
+        self.embed = EmbeddingHandler(
+            db_dir=VECTOR_STORE_DIR,
+            embedding_backend=EMBEDDING_BACKEND,
+            embedding_model_name=EMBEDDING_MODEL_NAME
+        )
+        logger.info(f"Vector store loaded in {perf_counter() - started:.2f}s")
 
     def search(
         self, industry_descr: str = "", job_title: str = "", job_description: str = ""
