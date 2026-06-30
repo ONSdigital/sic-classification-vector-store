@@ -181,3 +181,4 @@ cython_debug/
 src/sic_classification_vector_store/data/vector_store/*
 
 .DS_Store
+src/sic_classification_vector_store/data/vector_store_onnx/*

@@ -12,8 +12,8 @@ from survey_assist_utils.logging import get_logger
 
 from time import perf_counter
 
-EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", None)
-EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", None)
+EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "light-embed-onnx")
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "onnx-models/all-MiniLM-L6-v2-onnx")
 
 logger = get_logger(__name__, level="DEBUG")
 

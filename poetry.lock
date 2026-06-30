@@ -5527,7 +5527,7 @@ survey-assist-utils = {git = "https://github.com/ONSdigital/survey-assist-utils.
 type = "git"
 url = "https://github.com/ONSdigital/sic-classification-utils"
 reference = "experimental/onnx-embed-poc"
-resolved_reference = "f72793dfe443151d412ec59042e7d2dee3cd78d9"
+resolved_reference = "64d4831d8922129fbe8283b93f35885f97c05444"
 
 [[package]]
 name = "six"
